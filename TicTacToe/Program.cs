@@ -11,30 +11,30 @@ namespace TicTacToe
     {
         static void Main(string[] args)
         {
-            char[][] board = new char[9][];
-            char[] bigBoard = new char[9];
+            char[][] board = new char[10][];
             char player1 = 'X';
             char player2 = 'O';
             char currentPlayer = 'X';
+            int z = 9;
 
             buildBoard();
-            initBoard(board, bigBoard);
+            initBoard(board);
 
             do
             {
                 if (currentPlayer == player1)
                 {
-                    int z = humanTurn(board, player1);
-                    subGameOver(z, board, bigBoard, currentPlayer);
+                    z = humanTurn(board, player1);
                 }
                 else
                 {
-                    subGameOver(computerTurn(board, player2), board, bigBoard, currentPlayer);
+                    z = computerTurn(board, player2);
                 }
                 updateBoard(board);
+                subGameOver(z, board, currentPlayer);
                 currentPlayer = changePlayer(currentPlayer);
             }
-            while (gameOn(bigBoard));
+            while (!subGameOver(9, board, currentPlayer));
 
             Console.Clear();
             if (currentPlayer == player1)
@@ -59,13 +59,12 @@ namespace TicTacToe
                 return currentPlayer;
             }
         }
-        private static void initBoard(char[][] board, char[] bigBoard)
+        private static void initBoard(char[][] board)
         {
 
-            for (int i = 0; i < 9; i++)
+            for (int i = 0; i < 10; i++)
             {
                 board[i] = new char[9];
-                bigBoard[i] = ' ';
                 for (int j = 0; j < 9; j++)
                 {
                     board[i][j] = ' ';
@@ -80,7 +79,7 @@ namespace TicTacToe
             int small = 0;
             for (int x = 2; x <= 26; x += 12)
             {
-                for (int y = 2; y <= 26; y +=12)
+                for (int y = 2; y <= 26; y += 12)
                 {
                     for (int j = 0; j < 3; j++)
                     {
@@ -98,63 +97,63 @@ namespace TicTacToe
             }
 
         }
-        private static void updateBigBoard(char[] bigBoard)
+        private static void updateBigBoard(char[][] board)
         {
             int location = 0;
             for (int i = 0; i < 3; i++)
             {
-                for ( int j = 0; j < 3; j++)
+                for (int j = 0; j < 3; j++)
                 {
                     Console.ForegroundColor = ConsoleColor.Yellow;
                     Console.SetCursorPosition(42 + j * 4, 14 + i * 4);
-                    Console.Write(bigBoard[location]);
+                    Console.Write(board[9][location]);
 
                 }
             }
 
         }
         private static void buildBoard()
-         {
-                for (int i = 0; i <= 36; i += 4)
+        {
+            for (int i = 0; i <= 36; i += 4)
+            {
+                for (int j = 0; j <= 36; j++)
                 {
-                    for (int j = 0; j <= 36; j++)
-                    {
-                        if (i % 12 == 0 || j % 12 == 0)
-                        {
-                            Console.ForegroundColor = ConsoleColor.Red;
-                            Console.SetCursorPosition(i, j);
-                            Console.Write("#");
-                            Console.SetCursorPosition(j, i);
-                            Console.Write("#");
-                        }
-                        else
-                        {
-                            Console.ForegroundColor = ConsoleColor.DarkRed;
-                            Console.SetCursorPosition(i, j);
-                            Console.Write("#");
-                            Console.SetCursorPosition(j, i);
-                            Console.Write("#");
-                        } 
-                    }
-                }
-                for (int i= 40; i < 53; i+=4)
-                {
-                    for (int j = 12; j < 25; j++)
+                    if (i % 12 == 0 || j % 12 == 0)
                     {
                         Console.ForegroundColor = ConsoleColor.Red;
                         Console.SetCursorPosition(i, j);
                         Console.Write("#");
+                        Console.SetCursorPosition(j, i);
+                        Console.Write("#");
                     }
-                }
-                for (int i = 12; i < 25; i += 4)
-                {
-                    for (int j = 40; j < 53; j++)
+                    else
                     {
-                        Console.ForegroundColor = ConsoleColor.Red;
-                        Console.SetCursorPosition(j , i);
+                        Console.ForegroundColor = ConsoleColor.DarkRed;
+                        Console.SetCursorPosition(i, j);
+                        Console.Write("#");
+                        Console.SetCursorPosition(j, i);
                         Console.Write("#");
                     }
                 }
+            }
+            for (int i = 40; i < 53; i += 4)
+            {
+                for (int j = 12; j < 25; j++)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.SetCursorPosition(i, j);
+                    Console.Write("#");
+                }
+            }
+            for (int i = 12; i < 25; i += 4)
+            {
+                for (int j = 40; j < 53; j++)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.SetCursorPosition(j, i);
+                    Console.Write("#");
+                }
+            }
         }
 
         private static int humanTurn(char[][] board, char player1)
@@ -173,7 +172,7 @@ namespace TicTacToe
             x--;
             bool res2 = Int32.TryParse(input2, out y);
             y--;
-            while (!res || !res2 || board[x][y] != ' ')
+            while (!res || !res2 || board[x][y] != ' ' || x == 9)
             {
                 Console.SetCursorPosition(0, 39);
                 ClearCurrentConsoleLine();
@@ -213,30 +212,33 @@ namespace TicTacToe
             ClearCurrentConsoleLine();
             return x;
         }
-        public static void subGameOver(int z, char[][] board, char[] bigBoard, char currentPlayer)
+        public static bool subGameOver(int z, char[][] board, char currentPlayer)
         {
-            if((board[z][0] == board[z][1] && board[z][0] == board[z][2] && board[z][0] != ' ') || (board[z][3] == board[z][4] && board[z][3] == board[z][5] && board[z][3] != ' ')
-            || (board[z][6] == board[z][7] && board[z][6] == board[z][8] && board[z][6] != ' ') || (board[z][0] == board[z][3] && board[z][0] == board[z][6] && board[z][0] != ' ')
-            || (board[z][1] == board[z][4] && board[z][7] == board[z][1] && board[z][6] != ' ') || (board[z][2] == board[z][5] && board[z][2] == board[z][8] && board[z][2] != ' ')
-            || (board[z][0] == board[z][4] && board[z][0] == board[z][8] && board[z][0] != ' ') || (board[z][2] == board[z][4] && board[z][2] == board[z][6] && board[z][2] != ' '))
+            if (z == 9)
             {
-                bigBoard[z] = currentPlayer;
-                updateBigBoard(bigBoard);
+                if ((board[z][0] == board[z][1] && board[z][0] == board[z][2] && board[z][0] != ' ') || (board[z][3] == board[z][4] && board[z][3] == board[z][5] && board[z][3] != ' ')
+                || (board[z][6] == board[z][7] && board[z][6] == board[z][8] && board[z][6] != ' ') || (board[z][0] == board[z][3] && board[z][0] == board[z][6] && board[z][0] != ' ')
+                || (board[z][1] == board[z][4] && board[z][7] == board[z][1] && board[z][6] != ' ') || (board[z][2] == board[z][5] && board[z][2] == board[z][8] && board[z][2] != ' ')
+                || (board[z][0] == board[z][4] && board[z][0] == board[z][8] && board[z][0] != ' ') || (board[z][2] == board[z][4] && board[z][2] == board[z][6] && board[z][2] != ' '))
+                {
+                    return true;
+                }
+                else { return false; }
             }
-        }
-
-        public static bool gameOn(char[] bigBoard)
-        { 
-            if((bigBoard[0] == bigBoard[1] && bigBoard[0] == bigBoard[2] && bigBoard[0] != ' ') || (bigBoard[3] == bigBoard[4] && bigBoard[3] == bigBoard[5] && bigBoard[3] != ' ')
-            || (bigBoard[6] == bigBoard[7] && bigBoard[6] == bigBoard[8] && bigBoard[6] != ' ') || (bigBoard[0] == bigBoard[3] && bigBoard[0] == bigBoard[6] && bigBoard[0] != ' ')
-            || (bigBoard[1] == bigBoard[4] && bigBoard[7] == bigBoard[1] && bigBoard[6] != ' ') || (bigBoard[2] == bigBoard[5] && bigBoard[2] == bigBoard[8] && bigBoard[2] != ' ')
-            || (bigBoard[0] == bigBoard[4] && bigBoard[0] == bigBoard[8] && bigBoard[0] != ' ') || (bigBoard[2] == bigBoard[4] && bigBoard[2] == bigBoard[6] && bigBoard[2] != ' '))
+            else
             {
-                return false;
+                if ((board[z][0] == board[z][1] && board[z][0] == board[z][2] && board[z][0] != ' ') || (board[z][3] == board[z][4] && board[z][3] == board[z][5] && board[z][3] != ' ')
+                || (board[z][6] == board[z][7] && board[z][6] == board[z][8] && board[z][6] != ' ') || (board[z][0] == board[z][3] && board[z][0] == board[z][6] && board[z][0] != ' ')
+                || (board[z][1] == board[z][4] && board[z][7] == board[z][1] && board[z][6] != ' ') || (board[z][2] == board[z][5] && board[z][2] == board[z][8] && board[z][2] != ' ')
+                || (board[z][0] == board[z][4] && board[z][0] == board[z][8] && board[z][0] != ' ') || (board[z][2] == board[z][4] && board[z][2] == board[z][6] && board[z][2] != ' '))
+                {
+                    board[9][z] = currentPlayer;
+                    updateBigBoard(board);
+                    return false;
+                }
             }
-            return true;
+            return false;
         }
-
 
         public static void humanWon()
         {
