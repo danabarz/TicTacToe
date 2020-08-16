@@ -22,6 +22,7 @@ namespace TicTacToe
 
             do
             {
+
                 if (currentPlayer == player1)
                 {
                     int z = humanTurn(board, player1);
