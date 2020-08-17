@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Data;
 using System.Runtime.Serialization.Formatters;
@@ -9,217 +10,225 @@ namespace TicTacToe
 {
     class Program
     {
+        const int startPosition = 2;
+        const int spaceBetween = 4;
+        const int numOfBoards = 10;
+        const int innerCells = 3;
+        const int setLocation = 38;
+        const int cellsNumber = innerCells * innerCells;
+        const int distanceBoards = innerCells * spaceBetween;
+        const char player1 = 'X';
+        const char player2 = 'O';
+        const char empty = ' ';
+        static Random rand = new Random();
         static void Main(string[] args)
         {
-            char[][] board = new char[10][];
-            char player1 = 'X';
-            char player2 = 'O';
-            char currentPlayer = 'X';
-            int z = 9;
+            char[][] board = new char[numOfBoards][];
+            char currentPlayer = player2;
+            int z;
 
-            buildBoard();
-            initBoard(board);
+            HomePage();
+            InitBoard(board);
+            BuildBoard(board);
 
-            do
+            while (!SubGameOver(cellsNumber, board, currentPlayer)) 
             {
+                currentPlayer = ChangePlayer(currentPlayer);
                 if (currentPlayer == player1)
                 {
-                    z = humanTurn(board, player1);
+                    z = HumanTurn(board, player1);
                 }
                 else
                 {
-                    z = computerTurn(board, player2);
+                    z = ComputerTurn(board, player2);
                 }
-                updateBoard(board);
-                subGameOver(z, board, currentPlayer);
-                currentPlayer = changePlayer(currentPlayer);
+                SubGameOver(z, board, currentPlayer);
+                BuildBoard(board);
             }
-            while (!subGameOver(9, board, currentPlayer));
 
             Console.Clear();
+            if (Draw(cellsNumber, board))
+            {
+                DrawArt();
+            }
+            else if (currentPlayer == player1)
+            {
+                HumanWon();
+            }
+            else
+            {
+                HumanLose();
+            }
+        }
+        private static char ChangePlayer(char currentPlayer)
+        {
             if (currentPlayer == player1)
             {
-                humanWon();
-            }
-            else
-            {
-                humanLose();
-            }
-        }
-        private static char changePlayer(char currentPlayer)
-        {
-            if (currentPlayer == 'X')
-            {
-                currentPlayer = 'O';
+                currentPlayer = player2;
                 return currentPlayer;
             }
             else
             {
-                currentPlayer = 'X';
+                currentPlayer = player1;
                 return currentPlayer;
             }
         }
-        private static void initBoard(char[][] board)
+        private static void InitBoard(char[][] board)
         {
 
-            for (int i = 0; i < 10; i++)
+            for (int i = 0; i < numOfBoards; i++)
             {
-                board[i] = new char[9];
-                for (int j = 0; j < 9; j++)
+                board[i] = new char[cellsNumber];
+                for (int j = 0; j < cellsNumber; j++)
                 {
-                    board[i][j] = ' ';
+                    board[i][j] = empty;
 
                 }
             }
         }
 
-        private static void updateBoard(char[][] board)
+        private static void PrintBoard(int x, int y, char[][] board, int smallBoard)
         {
-            int big = 0;
-            int small = 0;
-            for (int x = 2; x <= 26; x += 12)
+            // Printing the game board
+            Console.SetCursorPosition(x, y);
+            for (int i = x; i <= x + distanceBoards; i += spaceBetween)
             {
-                for (int y = 2; y <= 26; y += 12)
+                for (int j = y; j <= y + distanceBoards; j++)
                 {
-                    for (int j = 0; j < 3; j++)
-                    {
-                        for (int i = 0; i < 3; i++)
-                        {
-                            Console.ForegroundColor = ConsoleColor.Yellow;
-                            Console.SetCursorPosition(y + i * 4, x + j * 4);
-                            Console.Write(board[big][small]);
-                            small++;
-                        }
-                    }
-                    small = 0;
-                    big++;
-                }
-            }
-
-        }
-        private static void updateBigBoard(char[][] board)
-        {
-            int location = 0;
-            for (int i = 0; i < 3; i++)
-            {
-                for (int j = 0; j < 3; j++)
-                {
-                    Console.ForegroundColor = ConsoleColor.Yellow;
-                    Console.SetCursorPosition(42 + j * 4, 14 + i * 4);
-                    Console.Write(board[9][location]);
-
-                }
-            }
-
-        }
-        private static void buildBoard()
-        {
-            for (int i = 0; i <= 36; i += 4)
-            {
-                for (int j = 0; j <= 36; j++)
-                {
-                    if (i % 12 == 0 || j % 12 == 0)
+                    if (i <= distanceBoards * innerCells && i % distanceBoards == 0 || i <= distanceBoards * innerCells && j % distanceBoards == 0)
                     {
                         Console.ForegroundColor = ConsoleColor.Red;
-                        Console.SetCursorPosition(i, j);
-                        Console.Write("#");
-                        Console.SetCursorPosition(j, i);
-                        Console.Write("#");
                     }
                     else
                     {
                         Console.ForegroundColor = ConsoleColor.DarkRed;
-                        Console.SetCursorPosition(i, j);
-                        Console.Write("#");
-                        Console.SetCursorPosition(j, i);
-                        Console.Write("#");
                     }
+                    Console.SetCursorPosition(i, j);
+                    Console.Write("#");
+
                 }
             }
-            for (int i = 40; i < 53; i += 4)
+
+            for (int j = y; j <= y + distanceBoards; j += spaceBetween)
             {
-                for (int j = 12; j < 25; j++)
+                for (int i = x; i <= x + distanceBoards; i ++)
                 {
-                    Console.ForegroundColor = ConsoleColor.Red;
+                    if (i <= distanceBoards * innerCells && i % distanceBoards == 0 || i <= distanceBoards * innerCells && j % distanceBoards == 0)
+                    {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                    }
+                    else
+                    {
+                        Console.ForegroundColor = ConsoleColor.DarkRed;
+                    }
                     Console.SetCursorPosition(i, j);
                     Console.Write("#");
                 }
             }
-            for (int i = 12; i < 25; i += 4)
+
+            // Updating the game board
+            int z = 0;
+            for (int j = y + startPosition; j <= y + distanceBoards - startPosition; j += spaceBetween)
             {
-                for (int j = 40; j < 53; j++)
+                for (int i = x + startPosition; i <= x + distanceBoards - startPosition; i += spaceBetween)
                 {
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.SetCursorPosition(j, i);
-                    Console.Write("#");
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    Console.SetCursorPosition(i, j);
+                    Console.Write(board[smallBoard][z]);
+                    z++;                  
                 }
             }
+
         }
 
-        private static int humanTurn(char[][] board, char player1)
+        private static void BuildBoard(char[][] board)
+        {
+            PrintBoard(0, 0, board, 0);
+            PrintBoard(distanceBoards, 0, board, 1);
+            PrintBoard(distanceBoards * 2, 0, board, 2);
+            PrintBoard(0, distanceBoards, board, 3);
+            PrintBoard(distanceBoards, distanceBoards, board, 4);
+            PrintBoard(distanceBoards * 2, distanceBoards, board, 5);
+            PrintBoard(0, distanceBoards * 2, board, 6);
+            PrintBoard(distanceBoards, distanceBoards * 2, board, 7);
+            PrintBoard(distanceBoards * 2, distanceBoards * 2, board, 8);
+            PrintBoard(distanceBoards * innerCells + spaceBetween, distanceBoards, board, 9);
+        }   
+        private static int HumanTurn(char[][] board, char player1)
         {
             Console.ForegroundColor = ConsoleColor.Red;
-            Console.SetCursorPosition(0, 38);
+            Console.SetCursorPosition(0, setLocation);
             Console.Write("Human Turn");
-            Console.SetCursorPosition(0, 39);
+            Console.SetCursorPosition(0, setLocation + 1);
             Console.Write("Please enter sub board and location: ");
             string location = Console.ReadLine();
-            string[] numbers = location.Split(new Char[] { ' ', ',', '.', '-', '\n', '\t' });
+            string[] numbers = location.Split(new char[] { ' ', ',', '.'});
             string input = numbers[0];
             string input2 = numbers[1];
-            int x, y;
-            bool res = Int32.TryParse(input, out x);
+            bool res = int.TryParse(input, out int x);
             x--;
-            bool res2 = Int32.TryParse(input2, out y);
+            bool res2 = int.TryParse(input2, out int y);
             y--;
-            while (!res || !res2 || board[x][y] != ' ' || x == 9)
+            while (!res || !res2 || board[x][y] != ' ' || x >= cellsNumber || y >= cellsNumber)
             {
-                Console.SetCursorPosition(0, 39);
+                Console.SetCursorPosition(0, setLocation + 1);
                 ClearCurrentConsoleLine();
-                Console.WriteLine("Oops... Please enter valid input: ");
+                Console.Write("Oops... Please enter valid input: ");
                 location = Console.ReadLine();
-                numbers = location.Split(new Char[] { ' ', ',', '.', '-', '\n', '\t' });
+                numbers = location.Split(new char[] { ' ', ',', '.'});
                 input = numbers[0];
                 input2 = numbers[1];
-                res = Int32.TryParse(input, out x);
+                res = int.TryParse(input, out x);
                 x--;
-                res2 = Int32.TryParse(input2, out y);
+                res2 = int.TryParse(input2, out y);
                 y--;
             }
-            Console.SetCursorPosition(0, 39);
+            Console.SetCursorPosition(0, setLocation + 1);
             ClearCurrentConsoleLine();
             ClearCurrentConsoleLine();
             board[x][y] = player1;
             return x;
         }
-
-        private static int computerTurn(char[][] board, char player2)
+        private static int ComputerTurn(char[][] board, char player2)
         {
-            var rand = new Random();
+            
+            // crate collection list that contain all the empty spaces and the random choose from that
             int x, y;
             Console.ForegroundColor = ConsoleColor.Red;
-            Console.SetCursorPosition(0, 38);
+            Console.SetCursorPosition(0, setLocation);
             Console.Write("Computer Turn");
             do
             {
-                x = rand.Next(9);
-                y = rand.Next(9);
+                x = rand.Next(cellsNumber);
+                y = rand.Next(cellsNumber);
             }
-            while (board[x][y] != ' ');
+            while (board[x][y] != empty);
             board[x][y] = player2;
-            Thread.Sleep(3000);
-            Console.SetCursorPosition(0, 38);
+            Console.SetCursorPosition(0, setLocation);
             ClearCurrentConsoleLine();
             return x;
         }
-        public static bool subGameOver(int z, char[][] board, char currentPlayer)
+
+        private static SortedList<int, int> CreateList(char[][] board)
         {
-            if (z == 9)
+            SortedList<int, int> number = new SortedList<int, int>();
+            for (int i = 0; i < cellsNumber; i++)
             {
-                if ((board[z][0] == board[z][1] && board[z][0] == board[z][2] && board[z][0] != ' ') || (board[z][3] == board[z][4] && board[z][3] == board[z][5] && board[z][3] != ' ')
-                || (board[z][6] == board[z][7] && board[z][6] == board[z][8] && board[z][6] != ' ') || (board[z][0] == board[z][3] && board[z][0] == board[z][6] && board[z][0] != ' ')
-                || (board[z][1] == board[z][4] && board[z][7] == board[z][1] && board[z][6] != ' ') || (board[z][2] == board[z][5] && board[z][2] == board[z][8] && board[z][2] != ' ')
-                || (board[z][0] == board[z][4] && board[z][0] == board[z][8] && board[z][0] != ' ') || (board[z][2] == board[z][4] && board[z][2] == board[z][6] && board[z][2] != ' '))
+                for (int j = 0; j < cellsNumber; j++)
+                {
+                    if (board[i][j] == empty)
+                    {
+                        number.Add(i, j);
+                    }
+                }
+            }
+            return number;
+        }
+        public static bool SubGameOver(int z, char[][] board, char currentPlayer)
+        {
+            if (z == cellsNumber)
+            {
+                if (Horizontal(z, board) || Vertical(z, board) || Diagonal(z, board) || Draw(z, board))
                 {
                     return true;
                 }
@@ -227,20 +236,66 @@ namespace TicTacToe
             }
             else
             {
-                if ((board[z][0] == board[z][1] && board[z][0] == board[z][2] && board[z][0] != ' ') || (board[z][3] == board[z][4] && board[z][3] == board[z][5] && board[z][3] != ' ')
-                || (board[z][6] == board[z][7] && board[z][6] == board[z][8] && board[z][6] != ' ') || (board[z][0] == board[z][3] && board[z][0] == board[z][6] && board[z][0] != ' ')
-                || (board[z][1] == board[z][4] && board[z][7] == board[z][1] && board[z][6] != ' ') || (board[z][2] == board[z][5] && board[z][2] == board[z][8] && board[z][2] != ' ')
-                || (board[z][0] == board[z][4] && board[z][0] == board[z][8] && board[z][0] != ' ') || (board[z][2] == board[z][4] && board[z][2] == board[z][6] && board[z][2] != ' '))
+                if ((Horizontal(z, board) || Vertical(z, board) || Diagonal(z, board)) && board[cellsNumber][z] == empty)
                 {
-                    board[9][z] = currentPlayer;
-                    updateBigBoard(board);
+                    board[cellsNumber][z] = currentPlayer;
+                    return false;
+                }
+                else if (Draw(z, board) && board[cellsNumber][z] == empty)
+                {
+                    board[cellsNumber][z] = '-';
                     return false;
                 }
             }
             return false;
         }
 
-        public static void humanWon()
+        public static bool Horizontal(int z, char[][] board)
+        {
+            if ((board[z][0] == board[z][1] && board[z][0] == board[z][2] && board[z][0] != empty) || (board[z][3] == board[z][4] && board[z][3] == board[z][5] && board[z][3] != empty)
+            || (board[z][6] == board[z][7] && board[z][6] == board[z][8] && board[z][6] != empty))
+            {
+                return true;
+            }
+            return false;
+        }
+
+        public static bool Vertical(int z, char[][] board)
+        {
+            if ((board[z][0] == board[z][3] && board[z][0] == board[z][6] && board[z][0] != empty) || (board[z][1] == board[z][4] && board[z][1] == board[z][7] && board[z][1] != empty)
+            || (board[z][2] == board[z][5] && board[z][2] == board[z][8] && board[z][2] != empty))
+            {
+                return true;
+            }
+            return false;
+        }
+
+        public static bool Diagonal(int z, char[][] board)
+        {
+            if ((board[z][0] == board[z][4] && board[z][0] == board[z][8] && board[z][0] != empty) || (board[z][2] == board[z][4] && board[z][2] == board[z][6] && board[z][2] != empty))
+            {
+                return true;
+            }
+            return false;
+        }
+
+        public static bool Draw(int z, char[][] board)
+        {
+            int i = 0;
+            while (i < cellsNumber)
+            {
+                if (board[z][i] != empty)
+                {
+                    i++;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+        public static void HumanWon()
         {
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine("     )                                   ____ ");
@@ -253,7 +308,7 @@ namespace TicTacToe
             Console.WriteLine("  |_| \\___/ \\_,_|   \\_/\\_/ \\___/|_||_|((_)    ");
         }
 
-        public static void humanLose()
+        public static void HumanLose()
         {
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine("  ▄████  ▄▄▄       ███▄ ▄███▓▓█████     ▒█████   ██▒   █▓▓█████  ██▀███   ▐██▌ ");
@@ -265,6 +320,32 @@ namespace TicTacToe
             Console.WriteLine("  ░   ░   ▒   ▒▒ ░░  ░      ░ ░ ░  ░     ░ ▒ ▒░    ░ ░░   ░ ░  ░  ░▒ ░ ▒░ ░  ░ ");
             Console.WriteLine("░ ░   ░   ░   ▒   ░      ░      ░      ░ ░ ░ ▒       ░░     ░     ░░   ░     ░ ");
         }
+        
+        public static void DrawArt()
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("  _ _   _           _                    ");
+            Console.WriteLine(" (_) | ( )         | |                   ");
+            Console.WriteLine("  _| |_|/ ___    __| |_ __ __ ___      __");
+            Console.WriteLine(" | | __| / __|  / _` | '__/ _` \\ \\ /\\ / /");
+            Console.WriteLine(" | | |_  \\__ \\ | (_| | | | (_| |\\ V  V / ");
+            Console.WriteLine(" |_|\\__| |___/  \\__,_|_|  \\__,_| \\_/\\_/  ");
+        }
+
+        public static void HomePage()
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("  __  ______  _            __        _______    ______        ______        ");
+            Console.WriteLine(" / / / / / /_(_)_ _  ___ _/ /____   /_  __(_)__/_  __/__ ____/_  __/__  ___ ");
+            Console.WriteLine("/ /_/ / / __/ /  ' \\/ _ `/ __/ -_)   / / / / __// / / _ `/ __// / / _ \\/ -_)");
+            Console.WriteLine("\\____/_/\\__/_/_/_/_/\\_,_/\\__/\\__/   /_/ /_/\\__//_/  \\_,_/\\__//_/  \\___/\\__/ ");
+            Console.ResetColor();
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("\nWelcome to Tic Tac Toe, please press any to begin");
+            Console.ReadKey();
+            Console.Clear();
+        }
+
 
 
         public static void ClearCurrentConsoleLine()
