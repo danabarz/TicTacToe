@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Data;
+using System.Linq;
 using System.Runtime.Serialization.Formatters;
 using System.Threading;
 
@@ -20,7 +21,7 @@ namespace TicTacToe
         const char player1 = 'X';
         const char player2 = 'O';
         const char empty = ' ';
-        static Random rand = new Random();
+        static readonly Random rand = new Random();
         static void Main(string[] args)
         {
             char[][] board = new char[numOfBoards][];
@@ -145,13 +146,13 @@ namespace TicTacToe
         {
             PrintBoard(0, 0, board, 0);
             PrintBoard(distanceBoards, 0, board, 1);
-            PrintBoard(distanceBoards * 2, 0, board, 2);
+            PrintBoard(distanceBoards * startPosition, 0, board, 2);
             PrintBoard(0, distanceBoards, board, 3);
             PrintBoard(distanceBoards, distanceBoards, board, 4);
-            PrintBoard(distanceBoards * 2, distanceBoards, board, 5);
-            PrintBoard(0, distanceBoards * 2, board, 6);
-            PrintBoard(distanceBoards, distanceBoards * 2, board, 7);
-            PrintBoard(distanceBoards * 2, distanceBoards * 2, board, 8);
+            PrintBoard(distanceBoards * startPosition, distanceBoards, board, 5);
+            PrintBoard(0, distanceBoards * startPosition, board, 6);
+            PrintBoard(distanceBoards, distanceBoards * startPosition, board, 7);
+            PrintBoard(distanceBoards * startPosition, distanceBoards * startPosition, board, 8);
             PrintBoard(distanceBoards * innerCells + spaceBetween, distanceBoards, board, 9);
         }   
         private static int HumanTurn(char[][] board, char player1)
@@ -185,44 +186,44 @@ namespace TicTacToe
             }
             Console.SetCursorPosition(0, setLocation + 1);
             ClearCurrentConsoleLine();
+            Console.SetCursorPosition(0, setLocation);
             ClearCurrentConsoleLine();
             board[x][y] = player1;
             return x;
         }
         private static int ComputerTurn(char[][] board, char player2)
         {
-            
-            // crate collection list that contain all the empty spaces and the random choose from that
+            var emptyLocation= CreateList(board);
             int x, y;
+            int num;
             Console.ForegroundColor = ConsoleColor.Red;
             Console.SetCursorPosition(0, setLocation);
             Console.Write("Computer Turn");
-            do
-            {
-                x = rand.Next(cellsNumber);
-                y = rand.Next(cellsNumber);
-            }
-            while (board[x][y] != empty);
+            num = rand.Next(emptyLocation.Count());
+            x = emptyLocation[num].Item1;
+            y = emptyLocation[num].Item2;            
             board[x][y] = player2;
             Console.SetCursorPosition(0, setLocation);
+            Thread.Sleep(1000);
             ClearCurrentConsoleLine();
             return x;
         }
 
-        private static SortedList<int, int> CreateList(char[][] board)
+        private static List<Tuple<int, int>> CreateList(char[][] board)
         {
-            SortedList<int, int> number = new SortedList<int, int>();
+            var numbers = new List<Tuple<int, int>>();
             for (int i = 0; i < cellsNumber; i++)
             {
                 for (int j = 0; j < cellsNumber; j++)
                 {
                     if (board[i][j] == empty)
                     {
-                        number.Add(i, j);
+                        numbers.Add(new Tuple<int, int>(i, j));
+
                     }
                 }
             }
-            return number;
+            return numbers;
         }
         public static bool SubGameOver(int z, char[][] board, char currentPlayer)
         {
