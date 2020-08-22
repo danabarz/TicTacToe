@@ -11,9 +11,8 @@ namespace TicTacToe
 {
     class Program
     {
-        const int startPosition = 2;
+        const int printBoardStartLocation = 2;
         const int spaceBetweenCells = 4;
-        const int numOfBoards = 10;
         const int boardDimensions = 3;
         const int textOriginTop = 38;
         const int boardCellNumber = boardDimensions * boardDimensions;
@@ -23,38 +22,37 @@ namespace TicTacToe
         const char emptyMarker = ' ';
         const char tieMarker = '-';
         static readonly Random rand = new Random();
-        static readonly char[][] gameBoards = new char[numOfBoards][];
+        static readonly char[][] gameSubBoards = new char[boardCellNumber][];
+        static readonly char[] gameSummaryBoard = new char[boardCellNumber];
 
         static void Main(string[] args)
         {
             char currentPlayer = player2Marker;
             int subBoardIndex;
-
             HomePage();
             InitBoard();
-            PrintSubBoards();
+            PrintGameBoards();
 
-            while (!IsSubGameOver(boardCellNumber, currentPlayer)) 
+            while (FullGameOver() == 3) 
             {
                 currentPlayer = SwitchPlayer(currentPlayer);
                 subBoardIndex = (currentPlayer == player1Marker) ? HumanChooseSubBoardAndCell() : ComputerChooseSubBoardAndCell();
-                // todo: check how to use the return
-                IsSubGameOver(subBoardIndex, currentPlayer);
-                PrintSubBoards();
+                SubGameOver(subBoardIndex);
+                PrintGameBoards();
             }
-
+            int gameResult = FullGameOver();
             Console.Clear();
-            if (IsTieForSubGame(boardCellNumber))
+            switch (gameResult)
             {
-                TieArt();
-            }
-            else if (currentPlayer == player1Marker)
-            {
-                PrintWon();
-            }
-            else
-            {
-                PrintLose();
+                case 0:
+                    PrintWon();
+                    break;
+                case 1:
+                    PrintLose();
+                    break;
+                case 2:
+                    PrintTie();
+                    break;
             }
         }
         private static char SwitchPlayer(char currentPlayer)
@@ -65,17 +63,17 @@ namespace TicTacToe
         private static void InitBoard()
         {
 
-            for (int i = 0; i < numOfBoards; i++)
+            for (int i = 0; i < boardCellNumber; i++)
             {
-                gameBoards[i] = new char[boardCellNumber];
+                gameSubBoards[i] = new char[boardCellNumber];
                 for (int j = 0; j < boardCellNumber; j++)
                 {
-                    gameBoards[i][j] = emptyMarker;
+                    gameSummaryBoard[i] = emptyMarker;
+                    gameSubBoards[i][j] = emptyMarker;
 
                 }
             }
         }
-
         private static void PrintBoardAndPieces(int boardOriginLeft, int boardOriginTop, int subBoard)
         {
             // Printing the game board
@@ -116,64 +114,65 @@ namespace TicTacToe
 
             // Updating the game board
             int cellInBoard = 0;
-            for (int j = boardOriginTop + startPosition; j <= boardOriginTop + distanceBetweenBoards - startPosition; j += spaceBetweenCells)
+            for (int j = boardOriginTop + printBoardStartLocation; j <= boardOriginTop + distanceBetweenBoards - printBoardStartLocation; j += spaceBetweenCells)
             {
-                for (int i = boardOriginLeft + startPosition; i <= boardOriginLeft + distanceBetweenBoards - startPosition; i += spaceBetweenCells)
+                for (int i = boardOriginLeft + printBoardStartLocation; i <= boardOriginLeft + distanceBetweenBoards - printBoardStartLocation; i += spaceBetweenCells)
                 {
                     Console.ForegroundColor = ConsoleColor.Yellow;
                     Console.SetCursorPosition(i, j);
-                    Console.Write(gameBoards[subBoard][cellInBoard]);
+                    char updatePieceInBoard = (subBoard == boardCellNumber) ? gameSummaryBoard[cellInBoard] : gameSubBoards[subBoard][cellInBoard];
+                    Console.Write(updatePieceInBoard);
                     cellInBoard++;                  
                 }
             }
         }
 
-        private static void PrintSubBoards()
+        private static void PrintGameBoards()
         {
-            int boardIndex = 0;
-            PrintBoardAndPieces(0, 0, boardIndex++);
-            PrintBoardAndPieces(distanceBetweenBoards, 0, boardIndex++);
-            PrintBoardAndPieces(distanceBetweenBoards * startPosition, 0, boardIndex++);
-            PrintBoardAndPieces(0, distanceBetweenBoards, boardIndex++);
-            PrintBoardAndPieces(distanceBetweenBoards, distanceBetweenBoards, boardIndex++);
-            PrintBoardAndPieces(distanceBetweenBoards * startPosition, distanceBetweenBoards, boardIndex++);
-            PrintBoardAndPieces(0, distanceBetweenBoards * startPosition, boardIndex++);
-            PrintBoardAndPieces(distanceBetweenBoards, distanceBetweenBoards * startPosition, boardIndex++);
-            PrintBoardAndPieces(distanceBetweenBoards * startPosition, distanceBetweenBoards * startPosition, boardIndex++);
-            PrintBoardAndPieces(distanceBetweenBoards * boardDimensions + spaceBetweenCells, distanceBetweenBoards, boardIndex);
+            int subBoardIndex = 0;
+            PrintBoardAndPieces(0, 0, subBoardIndex++);
+            PrintBoardAndPieces(distanceBetweenBoards, 0, subBoardIndex++);
+            PrintBoardAndPieces(distanceBetweenBoards * printBoardStartLocation, 0, subBoardIndex++);
+            PrintBoardAndPieces(0, distanceBetweenBoards, subBoardIndex++);
+            PrintBoardAndPieces(distanceBetweenBoards, distanceBetweenBoards, subBoardIndex++);
+            PrintBoardAndPieces(distanceBetweenBoards * printBoardStartLocation, distanceBetweenBoards, subBoardIndex++);
+            PrintBoardAndPieces(0, distanceBetweenBoards * printBoardStartLocation, subBoardIndex++);
+            PrintBoardAndPieces(distanceBetweenBoards, distanceBetweenBoards * printBoardStartLocation, subBoardIndex++);
+            PrintBoardAndPieces(distanceBetweenBoards * printBoardStartLocation, distanceBetweenBoards * printBoardStartLocation, subBoardIndex++);
+            PrintBoardAndPieces(distanceBetweenBoards * boardDimensions + spaceBetweenCells, distanceBetweenBoards, subBoardIndex);
         }   
         private static int HumanChooseSubBoardAndCell()
         {
             SetBaseTextPosition();
             SetBaseColor();
             Console.Write("Human Turn");
-            Console.SetCursorPosition(0, textOriginTop + 1);
-            Console.Write("Please enter sub board and location: ");
-            string subBoardAndCellInput = Console.ReadLine();
-            var chosenAndValidPosition = SplitStringAndParse(subBoardAndCellInput);
-            while (chosenAndValidPosition.Item1 == -1 || chosenAndValidPosition.Item2 == -1)
+            string askPositionFromUser = "Please enter sub board and cell: ";
+            var validPositionFromUser = PrintMessageAndCheckValid(askPositionFromUser);
+            while (validPositionFromUser.Item1 == -1 || validPositionFromUser.Item2 == -1)
             {
                 Console.SetCursorPosition(0, textOriginTop + 1);
                 ClearCurrentConsoleLine();
-                Console.Write("Oops... Please enter valid input: ");
-                subBoardAndCellInput = Console.ReadLine();
-                chosenAndValidPosition = SplitStringAndParse(subBoardAndCellInput);
+                askPositionFromUser = "Oops... Please enter valid input: ";
+                validPositionFromUser = PrintMessageAndCheckValid(askPositionFromUser);
             }
             Console.SetCursorPosition(0, textOriginTop + 1);
             ClearCurrentConsoleLine();
             SetBaseTextPosition();
             ClearCurrentConsoleLine();
-            gameBoards[chosenAndValidPosition.Item1][chosenAndValidPosition.Item2] = player1Marker;
-            return chosenAndValidPosition.Item1;
-            
-            Tuple<int, int> SplitStringAndParse(string subBoardAndCellInput)
+            gameSubBoards[validPositionFromUser.Item1][validPositionFromUser.Item2] = player1Marker;
+            return validPositionFromUser.Item1;
+
+            static Tuple<int, int> PrintMessageAndCheckValid(string massegeForUser)
             {
+                Console.SetCursorPosition(0, textOriginTop + 1);
+                Console.Write(massegeForUser);
+                string subBoardAndCellInput = Console.ReadLine();
                 string[] numbers = subBoardAndCellInput.Split(new char[] { ' ', ',', '.' });
                 string input = numbers[0];
                 string input2 = numbers[1];
                 bool res = int.TryParse(input, out int x);
                 bool res2 = int.TryParse(input2, out int y);
-                if (res && res2 && x <= boardCellNumber && y <= boardCellNumber && gameBoards[--x][--y] == emptyMarker)
+                if (res && res2 && x <= boardCellNumber && y <= boardCellNumber && gameSubBoards[--x][--y] == emptyMarker)
                 {
                     return Tuple.Create(x, y);
                 }
@@ -191,7 +190,7 @@ namespace TicTacToe
             randomNumber = rand.Next(emptyLocation.Count());
             subBoardNumber = emptyLocation[randomNumber].Item1;
             cellNumber = emptyLocation[randomNumber].Item2;
-            gameBoards[subBoardNumber][cellNumber] = player2Marker;
+            gameSubBoards[subBoardNumber][cellNumber] = player2Marker;
             Thread.Sleep(1000);
             ClearCurrentConsoleLine();
             return subBoardNumber;
@@ -202,7 +201,7 @@ namespace TicTacToe
             var numbers = new List<Tuple<int, int>>();
             for (int i = 0; i < boardCellNumber; i++)
             {
-                char[] empty = gameBoards[i];
+                char[] empty = gameSubBoards[i];
                 int[] matchPositions = empty.Select((value, index) => value == emptyMarker ? index : -1).Where( index => index != -1).ToArray();
                 foreach(int x in matchPositions)
                 {
@@ -211,77 +210,154 @@ namespace TicTacToe
             }
             return numbers;
         }
-
-        //todo : this meyhos should return the player that won/tie/or that the sub game is not over- use enums
-        //todo: create IsFullGameOver- think how to not include the final board in the same array as the other
-        public static bool IsSubGameOver(int subBoardIndex, char currentPlayer)
+        public static int FullGameOver()
         {
-            //make another array to the final/big board- not include this one!!
-            if (subBoardIndex == boardCellNumber)
+            SummaryBoardStatus theWinner = SummaryBoardStatus.gameStillOn;
+            for (int i = 0; i < Enum.GetNames(typeof(SummaryBoardStatus)).Length; i++)
             {
-                return (IsHorizontalWinForSubGame(subBoardIndex) || IsVerticalWinForSubGame(subBoardIndex) || IsDiagonalWinForSubGame(subBoardIndex) || IsTieForSubGame(subBoardIndex));
+                switch(i)
+                {
+                    case 0:
+                        theWinner = HorizontalWinForSummaryBoard(theWinner);
+                        if (IsWinForSummaryGame(theWinner))
+                        {
+                            return (int)theWinner;
+                        }
+                        break;
+                    case 1:
+                        theWinner = VerticalWinForSummaryBoard(theWinner);
+                        if (IsWinForSummaryGame(theWinner))
+                        {
+                            return (int)theWinner;
+                        }
+                        break;
+                    case 2:
+                        theWinner = DiagonalWinForSummaryBoard(theWinner);
+                        if (IsWinForSummaryGame(theWinner))
+                        {
+                            return (int)theWinner;
+                        }
+                        break;
+                    case 3:
+                        theWinner = TieForSummaryBoard(theWinner);
+                        if (IsWinForSummaryGame(theWinner))
+                        {
+                            return (int)theWinner;
+                        }
+                        break;
+                }
             }
-            // todo: check which player won a sub game and set the summary board accordingly
-            if ((IsHorizontalWinForSubGame(subBoardIndex) || IsVerticalWinForSubGame(subBoardIndex) || IsDiagonalWinForSubGame(subBoardIndex)) && gameBoards[boardCellNumber][subBoardIndex] == emptyMarker)
+            return (int)theWinner;
+
+            static bool IsWinForSummaryGame(SummaryBoardStatus theWinner)
             {
-                gameBoards[boardCellNumber][subBoardIndex] = currentPlayer;
-                return false;
+                return (theWinner != SummaryBoardStatus.gameStillOn);
             }
-            else if (IsTieForSubGame(subBoardIndex) && gameBoards[boardCellNumber][subBoardIndex] == emptyMarker)
-            {
-                gameBoards[boardCellNumber][subBoardIndex] = tieMarker;
-                return false;
-            }
-            return false;
         }
 
+        public enum SummaryBoardStatus { winX, winO, tie, gameStillOn}
 
-        //create a delegate to all the win's check!
-        public static bool IsHorizontalWinForSubGame(int subBoardIndex)
+        public static SummaryBoardStatus HorizontalWinForSummaryBoard(SummaryBoardStatus theWinner)
         {
-            if ((gameBoards[subBoardIndex][0] == gameBoards[subBoardIndex][1] && gameBoards[subBoardIndex][0] == gameBoards[subBoardIndex][2] && gameBoards[subBoardIndex][0] != emptyMarker)
-            || (gameBoards[subBoardIndex][3] == gameBoards[subBoardIndex][4] && gameBoards[subBoardIndex][3] == gameBoards[subBoardIndex][5] && gameBoards[subBoardIndex][3] != emptyMarker)
-            || (gameBoards[subBoardIndex][6] == gameBoards[subBoardIndex][7] && gameBoards[subBoardIndex][6] == gameBoards[subBoardIndex][8] && gameBoards[subBoardIndex][6] != emptyMarker))
+            for (int i = 0; i < boardCellNumber; i += 3)
             {
-                return true;
+                if (gameSummaryBoard[i] == gameSummaryBoard[i + 1] && gameSummaryBoard[i] ==  gameSummaryBoard[i + 2]
+                && gameSummaryBoard[i] != emptyMarker && gameSummaryBoard[i] != tieMarker)
+                {
+                    theWinner = (gameSummaryBoard[i] == player1Marker) ? SummaryBoardStatus.winX : SummaryBoardStatus.winO;
+                    return theWinner;
+                }
             }
-            return false;
+            return theWinner;
         }
 
-        public static bool IsVerticalWinForSubGame(int subBoardIndex)
+        public static SummaryBoardStatus VerticalWinForSummaryBoard(SummaryBoardStatus theWinner)
         {
-            if ((gameBoards[subBoardIndex][0] == gameBoards[subBoardIndex][3] && gameBoards[subBoardIndex][0] == gameBoards[subBoardIndex][6] && gameBoards[subBoardIndex][0] != emptyMarker)
-                || (gameBoards[subBoardIndex][1] == gameBoards[subBoardIndex][4] && gameBoards[subBoardIndex][1] == gameBoards[subBoardIndex][7] && gameBoards[subBoardIndex][1] != emptyMarker)
-            || (gameBoards[subBoardIndex][2] == gameBoards[subBoardIndex][5] && gameBoards[subBoardIndex][2] == gameBoards[subBoardIndex][8] && gameBoards[subBoardIndex][2] != emptyMarker))
+            for (int i = 0; i < boardDimensions; i++)
             {
-                return true;
+                if (gameSummaryBoard[i] == gameSummaryBoard[i + 3] && gameSummaryBoard[i] == gameSummaryBoard[i + 6]
+                && gameSummaryBoard[i] != emptyMarker && gameSummaryBoard[i] != tieMarker)
+                {
+                    theWinner = (gameSummaryBoard[i] == player1Marker) ? SummaryBoardStatus.winX : SummaryBoardStatus.winO;
+                    return theWinner;
+                }
             }
-            return false;
+            return theWinner;
         }
 
-        public static bool IsDiagonalWinForSubGame(int subBoardIndex)
+        public static SummaryBoardStatus DiagonalWinForSummaryBoard(SummaryBoardStatus theWinner)
         {
-            if ((gameBoards[subBoardIndex][0] == gameBoards[subBoardIndex][4] && gameBoards[subBoardIndex][0] == gameBoards[subBoardIndex][8] && gameBoards[subBoardIndex][0] != emptyMarker)
-            || (gameBoards[subBoardIndex][2] == gameBoards[subBoardIndex][4] && gameBoards[subBoardIndex][2] == gameBoards[subBoardIndex][6] && gameBoards[subBoardIndex][2] != emptyMarker))
+            if ((gameSummaryBoard[0] == gameSummaryBoard[4] && gameSummaryBoard[0] == gameSummaryBoard[8] && gameSummaryBoard[0] != emptyMarker && gameSummaryBoard[0] != tieMarker)
+            || (gameSummaryBoard[2] == gameSummaryBoard[4] && gameSummaryBoard[2] == gameSummaryBoard[6] && gameSummaryBoard[2] != emptyMarker && gameSummaryBoard[2] != tieMarker))
             {
-                return true;
+                theWinner = (gameSummaryBoard[4] == player1Marker) ? SummaryBoardStatus.winX : SummaryBoardStatus.winO;
+                return theWinner;
             }
-            return false;
+            return theWinner;
         }
-
-
-        public static bool IsTieForSubGame(int subBoardIndex)
+        public static SummaryBoardStatus TieForSummaryBoard(SummaryBoardStatus theWinner)
         {
             for (int i = 0; i < boardCellNumber; i++)
             {
-                char [] subBoard = gameBoards[subBoardIndex];
-                char emptyPosition = Array.Find(subBoard, cell => cell == emptyMarker);
-                if (emptyPosition == emptyMarker)
+                char emptyPosition = Array.Find(gameSummaryBoard, cell => cell == emptyMarker);
+                if (emptyPosition != emptyMarker)
                 {
-                    return false;
+                    theWinner = SummaryBoardStatus.tie;
+                    return theWinner;
                 }
             }
-            return true;
+            return theWinner;
+        }
+
+        public static void SubGameOver(int subBoardIndex)
+        {
+            HorizontalWinForSubGame(subBoardIndex);
+            VerticalWinForSubGame(subBoardIndex);
+            DiagonalWinForSubGame(subBoardIndex);
+            TieForSubGame(subBoardIndex);
+        }
+        public static void HorizontalWinForSubGame(int subBoardIndex)
+        {
+            for (int i = 0; i < boardCellNumber; i += boardCellNumber)
+            {
+                if (gameSubBoards[subBoardIndex][i] == gameSubBoards[subBoardIndex][i+1] && gameSubBoards[subBoardIndex][i] == gameSubBoards[subBoardIndex][i+2]
+                && gameSubBoards[subBoardIndex][i] != emptyMarker)
+                {
+                    gameSummaryBoard[subBoardIndex] = gameSubBoards[subBoardIndex][i];
+                }
+            }
+        }
+        public static void VerticalWinForSubGame(int subBoardIndex)
+        {
+            for (int i = 0; i < boardDimensions; i++)
+            {
+                if (gameSubBoards[subBoardIndex][i] == gameSubBoards[subBoardIndex][i+ boardDimensions] && gameSubBoards[subBoardIndex][i] == gameSubBoards[subBoardIndex][i+ boardDimensions * 2]
+                && gameSubBoards[subBoardIndex][i] != emptyMarker)
+                {
+                    gameSummaryBoard[subBoardIndex] = gameSubBoards[subBoardIndex][i];
+                }
+            }
+        }
+        public static void DiagonalWinForSubGame(int subBoardIndex)
+        {
+            if ((gameSubBoards[subBoardIndex][0] == gameSubBoards[subBoardIndex][4] && gameSubBoards[subBoardIndex][0] == gameSubBoards[subBoardIndex][8] && gameSubBoards[subBoardIndex][0] != emptyMarker)
+            || (gameSubBoards[subBoardIndex][2] == gameSubBoards[subBoardIndex][4] && gameSubBoards[subBoardIndex][2] == gameSubBoards[subBoardIndex][6] && gameSubBoards[subBoardIndex][2] != emptyMarker))
+            {
+                gameSummaryBoard[subBoardIndex] = gameSubBoards[subBoardIndex][4];
+            }
+        }
+        public static void TieForSubGame(int subBoardIndex)
+        {
+            for (int i = 0; i < boardCellNumber; i++)
+            {
+                char [] subBoard = gameSubBoards[subBoardIndex];
+                char emptyPosition = Array.Find(subBoard, cell => cell == emptyMarker);
+                if (emptyPosition != emptyMarker)
+                {
+                    char pieceToAddSummaryBoard = tieMarker;
+                    gameSummaryBoard[subBoardIndex] = pieceToAddSummaryBoard;
+                }
+            }
         }
         public static void PrintWon()
         {
@@ -309,7 +385,7 @@ namespace TicTacToe
             Console.WriteLine("░ ░   ░   ░   ▒   ░      ░      ░      ░ ░ ░ ▒       ░░     ░     ░░   ░     ░ ");
         }
         
-        public static void TieArt()
+        public static void PrintTie()
         {
             SetBaseColor();
             Console.WriteLine("  _ _   _       _   _      ");
