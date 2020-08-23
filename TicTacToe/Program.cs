@@ -33,31 +33,29 @@ namespace TicTacToe
             InitBoard();
             PrintGameBoards();
 
-            while (FullGameOver() == 3) 
+            while (FullGameOver() == SummaryBoardStatus.GameStillOn) 
             {
                 currentPlayer = SwitchPlayer(currentPlayer);
                 subBoardIndex = (currentPlayer == player1Marker) ? HumanChooseSubBoardAndCell() : ComputerChooseSubBoardAndCell();
                 SubGameOver(subBoardIndex);
                 PrintGameBoards();
             }
-            int gameResult = FullGameOver();
             Console.Clear();
-            switch (gameResult)
+            switch (FullGameOver())
             {
-                case 0:
+                case SummaryBoardStatus.WinX:
                     PrintWon();
                     break;
-                case 1:
+                case SummaryBoardStatus.WinO:
                     PrintLose();
                     break;
-                case 2:
+                case SummaryBoardStatus.Tie:
                     PrintTie();
                     break;
             }
         }
         private static char SwitchPlayer(char currentPlayer)
         {
-            //todo: cyclic arrays- eldar
              return currentPlayer = (currentPlayer == player1Marker) ? player2Marker : player1Marker;
         }
         private static void InitBoard()
@@ -66,11 +64,10 @@ namespace TicTacToe
             for (int i = 0; i < boardCellNumber; i++)
             {
                 gameSubBoards[i] = new char[boardCellNumber];
+                gameSummaryBoard[i] = emptyMarker;
                 for (int j = 0; j < boardCellNumber; j++)
                 {
-                    gameSummaryBoard[i] = emptyMarker;
                     gameSubBoards[i][j] = emptyMarker;
-
                 }
             }
         }
@@ -147,20 +144,20 @@ namespace TicTacToe
             SetBaseColor();
             Console.Write("Human Turn");
             string askPositionFromUser = "Please enter sub board and cell: ";
-            var validPositionFromUser = PrintMessageAndCheckValid(askPositionFromUser);
-            while (validPositionFromUser.Item1 == -1 || validPositionFromUser.Item2 == -1)
+            var(subBoardNumber, cellNumber) = PrintMessageAndCheckValid(askPositionFromUser);
+            while (subBoardNumber == -1 || cellNumber == -1)
             {
                 Console.SetCursorPosition(0, textOriginTop + 1);
                 ClearCurrentConsoleLine();
                 askPositionFromUser = "Oops... Please enter valid input: ";
-                validPositionFromUser = PrintMessageAndCheckValid(askPositionFromUser);
+                (subBoardNumber, cellNumber) = PrintMessageAndCheckValid(askPositionFromUser);
             }
             Console.SetCursorPosition(0, textOriginTop + 1);
             ClearCurrentConsoleLine();
             SetBaseTextPosition();
             ClearCurrentConsoleLine();
-            gameSubBoards[validPositionFromUser.Item1][validPositionFromUser.Item2] = player1Marker;
-            return validPositionFromUser.Item1;
+            gameSubBoards[subBoardNumber][cellNumber] = player1Marker;
+            return subBoardNumber;
 
             static Tuple<int, int> PrintMessageAndCheckValid(string massegeForUser)
             {
@@ -170,11 +167,11 @@ namespace TicTacToe
                 string[] numbers = subBoardAndCellInput.Split(new char[] { ' ', ',', '.' });
                 string input = numbers[0];
                 string input2 = numbers[1];
-                bool res = int.TryParse(input, out int x);
-                bool res2 = int.TryParse(input2, out int y);
-                if (res && res2 && x <= boardCellNumber && y <= boardCellNumber && gameSubBoards[--x][--y] == emptyMarker)
+                bool res = int.TryParse(input, out int subBoardNumber);
+                bool res2 = int.TryParse(input2, out int cellNumber);
+                if (res && res2 && subBoardNumber <= boardCellNumber && cellNumber <= boardCellNumber && gameSubBoards[--subBoardNumber][--cellNumber] == emptyMarker)
                 {
-                    return Tuple.Create(x, y);
+                    return Tuple.Create(subBoardNumber, cellNumber);
                 }
                 return Tuple.Create(-1, -1);
             }
@@ -210,52 +207,38 @@ namespace TicTacToe
             }
             return numbers;
         }
-        public static int FullGameOver()
+        public static SummaryBoardStatus FullGameOver()
         {
-            SummaryBoardStatus theWinner = SummaryBoardStatus.gameStillOn;
-            for (int i = 0; i < Enum.GetNames(typeof(SummaryBoardStatus)).Length; i++)
+            SummaryBoardStatus theWinner = SummaryBoardStatus.GameStillOn;
+            theWinner = HorizontalWinForSummaryBoard(theWinner);
+            if (IsWinForSummaryGame(theWinner))
             {
-                switch(i)
-                {
-                    case 0:
-                        theWinner = HorizontalWinForSummaryBoard(theWinner);
-                        if (IsWinForSummaryGame(theWinner))
-                        {
-                            return (int)theWinner;
-                        }
-                        break;
-                    case 1:
-                        theWinner = VerticalWinForSummaryBoard(theWinner);
-                        if (IsWinForSummaryGame(theWinner))
-                        {
-                            return (int)theWinner;
-                        }
-                        break;
-                    case 2:
-                        theWinner = DiagonalWinForSummaryBoard(theWinner);
-                        if (IsWinForSummaryGame(theWinner))
-                        {
-                            return (int)theWinner;
-                        }
-                        break;
-                    case 3:
-                        theWinner = TieForSummaryBoard(theWinner);
-                        if (IsWinForSummaryGame(theWinner))
-                        {
-                            return (int)theWinner;
-                        }
-                        break;
-                }
+                return theWinner;
             }
-            return (int)theWinner;
+            theWinner = VerticalWinForSummaryBoard(theWinner);
+            if (IsWinForSummaryGame(theWinner))
+            {
+                return theWinner;
+            }
+            theWinner = DiagonalWinForSummaryBoard(theWinner);
+            if (IsWinForSummaryGame(theWinner))
+            {
+                return theWinner;
+            }
+            theWinner = TieForSummaryBoard(theWinner);
+            if (IsWinForSummaryGame(theWinner))
+            {
+                return theWinner;
+            }
+            return theWinner;
 
             static bool IsWinForSummaryGame(SummaryBoardStatus theWinner)
             {
-                return (theWinner != SummaryBoardStatus.gameStillOn);
+                return (theWinner != SummaryBoardStatus.GameStillOn);
             }
         }
 
-        public enum SummaryBoardStatus { winX, winO, tie, gameStillOn}
+        public enum SummaryBoardStatus { WinX, WinO, Tie, GameStillOn}
 
         public static SummaryBoardStatus HorizontalWinForSummaryBoard(SummaryBoardStatus theWinner)
         {
@@ -264,7 +247,7 @@ namespace TicTacToe
                 if (gameSummaryBoard[i] == gameSummaryBoard[i + 1] && gameSummaryBoard[i] ==  gameSummaryBoard[i + 2]
                 && gameSummaryBoard[i] != emptyMarker && gameSummaryBoard[i] != tieMarker)
                 {
-                    theWinner = (gameSummaryBoard[i] == player1Marker) ? SummaryBoardStatus.winX : SummaryBoardStatus.winO;
+                    theWinner = (gameSummaryBoard[i] == player1Marker) ? SummaryBoardStatus.WinX : SummaryBoardStatus.WinO;
                     return theWinner;
                 }
             }
@@ -278,7 +261,7 @@ namespace TicTacToe
                 if (gameSummaryBoard[i] == gameSummaryBoard[i + 3] && gameSummaryBoard[i] == gameSummaryBoard[i + 6]
                 && gameSummaryBoard[i] != emptyMarker && gameSummaryBoard[i] != tieMarker)
                 {
-                    theWinner = (gameSummaryBoard[i] == player1Marker) ? SummaryBoardStatus.winX : SummaryBoardStatus.winO;
+                    theWinner = (gameSummaryBoard[i] == player1Marker) ? SummaryBoardStatus.WinX : SummaryBoardStatus.WinO;
                     return theWinner;
                 }
             }
@@ -290,7 +273,7 @@ namespace TicTacToe
             if ((gameSummaryBoard[0] == gameSummaryBoard[4] && gameSummaryBoard[0] == gameSummaryBoard[8] && gameSummaryBoard[0] != emptyMarker && gameSummaryBoard[0] != tieMarker)
             || (gameSummaryBoard[2] == gameSummaryBoard[4] && gameSummaryBoard[2] == gameSummaryBoard[6] && gameSummaryBoard[2] != emptyMarker && gameSummaryBoard[2] != tieMarker))
             {
-                theWinner = (gameSummaryBoard[4] == player1Marker) ? SummaryBoardStatus.winX : SummaryBoardStatus.winO;
+                theWinner = (gameSummaryBoard[4] == player1Marker) ? SummaryBoardStatus.WinX : SummaryBoardStatus.WinO;
                 return theWinner;
             }
             return theWinner;
@@ -302,7 +285,7 @@ namespace TicTacToe
                 char emptyPosition = Array.Find(gameSummaryBoard, cell => cell == emptyMarker);
                 if (emptyPosition != emptyMarker)
                 {
-                    theWinner = SummaryBoardStatus.tie;
+                    theWinner = SummaryBoardStatus.Tie;
                     return theWinner;
                 }
             }
