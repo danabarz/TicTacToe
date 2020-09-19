@@ -16,6 +16,8 @@ namespace TicTacToe
         }
 
         public event EventHandler<TicTacToeEventArgs> PrintBoards;
+        public event EventHandler<EventArgs> AskGameType;
+        public event EventHandler<TicTacToeEventArgs> AskPlayersName;
 
         public SummaryBoard SummaryBoard { get; set; }
         public List<SubBoard> SubBoards { get; set; }
@@ -28,8 +30,6 @@ namespace TicTacToe
             }
         }
 
-        public event EventHandler<EventArgs> AskGameType;
-
         protected virtual void OnGameTypeSelected()
         {
             if (AskGameType != null)
@@ -37,8 +37,6 @@ namespace TicTacToe
                 AskGameType(this, EventArgs.Empty);
             }
         }
-
-        public event EventHandler<TicTacToeEventArgs> AskPlayersName;
 
         protected virtual void OnHumanVsHumanTypeSelected(int number)
         {

@@ -30,7 +30,6 @@ namespace TicTacToe
             int innerCol = SubBoardOpenMoves[randomNumber].Item2;
             Thread.Sleep(2000);
             return new PlayerMove(subBoards[subBoardRandomIndex], innerRow, innerCol, IdPlayer);
-            //todo: make the computer smart- AI
         }
     }
 }

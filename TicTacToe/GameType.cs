@@ -8,12 +8,13 @@ namespace TicTacToe
         {
             this.HumanPlayer1 = new HumanPlayer();
         }
-        public abstract Player SwitchPlayer();
 
         public event EventHandler<TicTacToeEventArgs> MangePlayerTurns;
 
         public Player CurrentPlayer { get; set; }
         public HumanPlayer HumanPlayer1 { get; set; }
+
+        public abstract Player SwitchPlayer();
 
         public void TurnManager(int numberOfTimes)
         {

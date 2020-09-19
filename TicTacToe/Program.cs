@@ -23,7 +23,7 @@ namespace TicTacToe
                 BoardView boardView = new BoardView();
                 PlayerMove playerMove;
 
-                game.AskGameType += gameView.OnGameTypeSelecting;
+                game.AskGameType += gameView.OnSelectingGameType;
                 game.AskPlayersName += gameView.OnHumanVsHumanTypeSelected;
                 game.PrintBoards += boardView.OnBoardsInitialized;
                 game.SummaryBoard.UpdateBoardPieces += boardView.OnBoardUpdated;

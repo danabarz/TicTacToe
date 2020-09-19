@@ -36,7 +36,7 @@ namespace TicTacToe
             ClearCurrentConsoleLine(Console.CursorLeft, textOriginTop + 1);
         }
 
-        public void OnGameTypeSelecting(object source, EventArgs args)
+        public void OnSelectingGameType(object source, EventArgs args)
         {
             Console.WriteLine("\nPlease select game type: \n1) Human Vs Human \n2) Human Vs Computer ");
         }
