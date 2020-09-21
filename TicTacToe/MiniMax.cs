@@ -67,7 +67,6 @@ namespace TicTacToe
             int row = -1;
             int col = -1;
 
-
             for (int i = 0; i < gameBoard.Rows; i++)
             {
                 for (int j = 0; j < gameBoard.Columns; j++)
