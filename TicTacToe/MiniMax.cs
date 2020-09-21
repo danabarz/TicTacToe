@@ -8,6 +8,8 @@ namespace TicTacToe
     {
         readonly EvaluationFunction evaluateFunction = new EvaluationFunction();
 
+
+        //todo: improve this method
         public int Minimax(Board gameBoard, int depth, Boolean isMax, PlayerMarker playerMarker)
         {
             int score = evaluateFunction.Evaluate(gameBoard, playerMarker);
@@ -17,14 +19,17 @@ namespace TicTacToe
             {
                 return score - depth;
             }
+
             else if (score == int.MinValue)
             {
                 return score + depth;
             }
+
             else if (gameBoard.CheckIfGameOver() == PlayerMarker.Tie)
             {
                 return 0;
             }
+
             else if(isMax)
             {
                 var (row, col) = TravrseBoardCell(gameBoard, playerMarker);
@@ -34,6 +39,7 @@ namespace TicTacToe
 
                 return best;
             }
+
             else
             {
                best = int.MaxValue;
@@ -45,25 +51,9 @@ namespace TicTacToe
             }
         }
 
-
-        private Tuple<int, int> TravrseBoardCell(Board gameBoard, PlayerMarker playerMarker)
-        {
-            for (int i = 0; i < gameBoard.Rows; i++)
-            {
-                for (int j = 0; j < gameBoard.Columns; j++)
-                {
-                    if (gameBoard.GameBoard[i, j] == null)
-                    {
-                        return Tuple.Create(i, j);
-                    }
-                }
-            }
-            return null;
-        }
-
         public PlayerMove FindBestMove(Board gameBoard, PlayerMarker playerMarker)
         { 
-            int bestVal = -1000;
+            int bestVal = int.MinValue;
             int row = -1;
             int col = -1;
 
@@ -86,6 +76,21 @@ namespace TicTacToe
                 }
             }
             return new PlayerMove(gameBoard, row, col, playerMarker);
+        }
+
+        private Tuple<int, int> TravrseBoardCell(Board gameBoard, PlayerMarker playerMarker)
+        {
+            for (int i = 0; i < gameBoard.Rows; i++)
+            {
+                for (int j = 0; j < gameBoard.Columns; j++)
+                {
+                    if (gameBoard.GameBoard[i, j] == null)
+                    {
+                        return Tuple.Create(i, j);
+                    }
+                }
+            }
+            return null;
         }
     }
 }

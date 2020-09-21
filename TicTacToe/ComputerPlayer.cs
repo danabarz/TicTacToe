@@ -15,6 +15,7 @@ namespace TicTacToe
 
         public override PlayerMove ChooseMove(List<SubBoard> subBoards)
         {
+            //todo: another way to decide in which sub board to play!!
             MiniMax miniMax = new MiniMax();
 
             foreach (SubBoard i in subBoards)
