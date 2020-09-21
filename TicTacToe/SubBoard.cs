@@ -12,5 +12,17 @@ namespace TicTacToe
             this.BoardOriginLeft = boardOriginLeft;
             this.BoardOriginTop = boardOriginTop;
         }
+
+        public SubBoard(PlayerMarker?[,] previousSubBoard)
+        {
+            this.GameBoard = previousSubBoard;
+        }
+
+        public override object Clone()
+        {
+            Board board = new SubBoard(this.GameBoard);
+            return board;
+
+        }
     }
 }

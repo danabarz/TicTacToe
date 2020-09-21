@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Common;
 
 namespace TicTacToe
 {
     abstract class Board
     {
-        protected const int boardDimensions = 3;
+        public const int boardDimensions = 3;
 
         public Board()
         {
@@ -26,12 +27,14 @@ namespace TicTacToe
         public int BoardOriginLeft { get; set; }
         public int BoardOriginTop { get; set; }
         public int BoardIndex { get; set; }
+        public int Rows { get; set; } = 3;
+        public int Columns { get; set; } = 3;
 
         protected virtual void OnBoardUpdated()
         {
             if (UpdateBoardPieces != null)
             {
-                UpdateBoardPieces(this, new TicTacToeEventArgs() { GameBoard = this.GameBoard, BoardOriginLeft = this.BoardOriginLeft, BoardOriginTop = this.BoardOriginTop});
+                UpdateBoardPieces(this, new TicTacToeEventArgs() { GameBoard = this.GameBoard, BoardOriginLeft = this.BoardOriginLeft, BoardOriginTop = this.BoardOriginTop });
             }
         }
 
@@ -68,9 +71,9 @@ namespace TicTacToe
         public List<Tuple<int, int>> FindOpenMoves()
         {
             var emptyLocationsOnBoard = new List<Tuple<int, int>>();
-            for (int i = 0; i < boardDimensions; i++)
+            for (int i = 0; i < Rows; i++)
             {
-                for (int j = 0; j < boardDimensions; j++)
+                for (int j = 0; j < Columns; j++)
                 {
                     if (this.GameBoard[i, j] == null)
                     {
@@ -83,12 +86,21 @@ namespace TicTacToe
 
         public PlayerMarker? HorizontalWinForGame()
         {
-            for (int i = 0; i < boardDimensions; i++)
+            for (int i = 0; i < Rows; i++)
             {
-                int j = 0;
-                if (this.GameBoard[i, j] == this.GameBoard[i ,++j] && this.GameBoard[i, j] == this.GameBoard[i, ++j] && this.GameBoard[i, j] != null && this.GameBoard[i, j] != PlayerMarker.Tie)
+                int count = 0;
+                PlayerMarker? playerMarkerHorizontal = this.GameBoard[i, i];
+                for (int j = 0; j < Columns; j++)
                 {
-                    return this.GameBoard[i, j];
+                    if (this.GameBoard[i, j] == playerMarkerHorizontal)
+                    {
+                        count++;
+                    }
+
+                    if (count == boardDimensions && playerMarkerHorizontal != null && playerMarkerHorizontal != PlayerMarker.Tie)
+                    {
+                        return playerMarkerHorizontal;
+                    }
                 }
             }
             return null;
@@ -96,12 +108,21 @@ namespace TicTacToe
 
         public PlayerMarker? VerticalWinForGame()
         {
-            for (int j = 0; j < boardDimensions; j++)
+            for (int j = 0; j < Columns; j++)
             {
-                int i = 0;
-                if (this.GameBoard[i, j] == this.GameBoard[++i, j] && this.GameBoard[i, j] == this.GameBoard[++i, j] && this.GameBoard[i, j] != null && this.GameBoard[i, j] != PlayerMarker.Tie)
+                int count = 0;
+                PlayerMarker? playerMarkerVertical = this.GameBoard[j, j];
+                for (int i = 0; i < Rows; i++)
                 {
-                    return this.GameBoard[i, j];
+                    if (this.GameBoard[i, j] == playerMarkerVertical)
+                    {
+                        count++;
+                    }
+
+                    if (count == boardDimensions && playerMarkerVertical != null && playerMarkerVertical != PlayerMarker.Tie)
+                    {
+                        return playerMarkerVertical;
+                    }
                 }
             }
             return null;
@@ -109,24 +130,50 @@ namespace TicTacToe
 
         public PlayerMarker? DiagonalWinForGame()
         {
-            int i = 0;
-            int j = 1;
-            if (this.GameBoard[i, i] == this.GameBoard[j, j++] && this.GameBoard[i, i] == this.GameBoard[j, j] && this.GameBoard[i, i] != null && this.GameBoard[i, i] != PlayerMarker.Tie)               
-            { 
-                return this.GameBoard[i, i];
-            }
-            else if (this.GameBoard[i++, j--] == this.GameBoard[i, j] && this.GameBoard[i++, j--] == this.GameBoard[i, j] && this.GameBoard[i ,j] != null && this.GameBoard[i, j] != PlayerMarker.Tie)
+            int count = 0;
+            int row = 0;
+            int column = 2;
+
+            PlayerMarker? playerMarkerDiagonalOne = this.GameBoard[row, row];
+
+            for (int j = 0; j < Rows; j++)
             {
-                return this.GameBoard[i, j];
+                if (this.GameBoard[j, j] == playerMarkerDiagonalOne)
+                {
+                    count++;
+                }
+            }
+
+            if (count == boardDimensions && playerMarkerDiagonalOne != null && playerMarkerDiagonalOne != PlayerMarker.Tie)
+            {
+                return playerMarkerDiagonalOne;
+            }
+
+            count = 0;
+            PlayerMarker? playerMarkerDiagonalTwo = this.GameBoard[row, column];
+
+            while (row < Rows && column >= 0)
+            {
+                if (this.GameBoard[row, column] == playerMarkerDiagonalTwo)
+                {
+                    count++;
+                }
+                row++;
+                column--;
+            }
+
+            if (count == boardDimensions && playerMarkerDiagonalTwo != null && playerMarkerDiagonalTwo != PlayerMarker.Tie)
+            {
+                return playerMarkerDiagonalTwo;
             }
             return null;
         }
 
         public PlayerMarker? TieWinForGame()
         {
-            for (int i = 0; i < boardDimensions; i++)
+            for (int i = 0; i < Rows; i++)
             {
-                for (int j = 0; j < boardDimensions; j++)
+                for (int j = 0; j < Columns; j++)
                 {
                     if (this.GameBoard[i, j] == null)
                     {
@@ -136,11 +183,16 @@ namespace TicTacToe
             }
             return PlayerMarker.Tie;
         }
-        
+
         public PlayerMarker? CheckIfGameOver()
         {
             PlayerMarker? OwnerForBoard = (HorizontalWinForGame() ?? VerticalWinForGame()) ?? (DiagonalWinForGame() ?? TieWinForGame());
             return OwnerForBoard;
+        }
+
+        public PlayerMarker GetOponenentPiece(PlayerMarker playerMarker)
+        {
+            return (playerMarker == PlayerMarker.X) ? PlayerMarker.O : PlayerMarker.X;
         }
     }
 }
