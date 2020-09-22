@@ -3,31 +3,26 @@ using System.Collections.Generic;
 
 namespace TicTacToe
 {
-    abstract class Player
+    public abstract class Player
     {
-        protected const int boardDimensions = 3;
+        protected const int BoardDimensions = 3;
 
-        public event EventHandler<TicTacToeEventArgs> PrintHumanOutput;
-        public event EventHandler<EventArgs> ClearSpecificLine;
+        public event EventHandler<IntEventArgs> PrintingHumanOutput;
+        public event EventHandler<EventArgs> ClearedSpecificLine;
 
         public PlayerMarker IdPlayer { get; set; }
         public string PlayerName { get; set; }
 
-        protected virtual void OnHumanPlaying(int numberOfAttempts)
+        protected void OnHumanPlaying(int numberOfAttempts)
         {
-            if (PrintHumanOutput != null)
-            {
-                PrintHumanOutput(this, new TicTacToeEventArgs() { NumberOfTimes = numberOfAttempts });
-            }
+            PrintingHumanOutput?.Invoke(this, new IntEventArgs { CountTimes = numberOfAttempts });
         }
 
-        protected virtual void OnLocationEntered()
+        protected void OnLocationEntered()
         {
-            if (ClearSpecificLine != null)
-            {
-                ClearSpecificLine(this, EventArgs.Empty);
-            }
+            ClearedSpecificLine?.Invoke(this, EventArgs.Empty);
         }
+
         public abstract PlayerMove ChooseMove(List<SubBoard> subBoards);
     }
 }

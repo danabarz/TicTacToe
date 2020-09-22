@@ -10,7 +10,7 @@ using System.Threading;
 
 namespace TicTacToe
 {
-    class Program
+    public class Program
     {
         static void Main(string[] args)
         {
@@ -23,40 +23,40 @@ namespace TicTacToe
                 BoardView boardView = new BoardView();
                 PlayerMove playerMove;
 
-                game.AskGameType += gameView.OnSelectingGameType;
-                game.AskPlayersName += gameView.OnHumanVsHumanTypeSelected;
-                game.PrintBoards += boardView.OnBoardsInitialized;
-                game.SummaryBoard.UpdateBoardPieces += boardView.OnBoardUpdated;
-                boardView.SetColorBoard += gameView.OnPrintBoardView;
+                game.AskingGameType += gameView.OnSelectingGameType;
+                game.AskingPlayersName += gameView.OnHumanVsHumanTypeSelected;
+                game.PrintingBoards += boardView.OnBoardsInitialized;
+                game.SummaryBoard.UpdatedBoardPieces += boardView.OnBoardUpdated;
+                boardView.ChangedBoardColor += gameView.OnPrintedBoardView;
 
                 gameView.PrintHomePage();
 
                 GameType gameType = game.InitGameType();
 
-                gameType.MangePlayerTurns += gameView.OnPlayerPlayed;
+                gameType.MangedPlayerTurns += gameView.OnPlayerPlayed;
 
                 game.InitBoards();
 
-                while (game.SummaryBoard.Owner == null)
+                while (game.SummaryBoard.Winner == null)
                 {
                     gameType.TurnManager(numberOfTurns);
 
-                    gameType.CurrentPlayer.PrintHumanOutput += gameView.OnHumanPlaying;
-                    gameType.CurrentPlayer.ClearSpecificLine += gameView.OnLocationEntered;
+                    gameType.CurrentPlayer.PrintingHumanOutput += gameView.OnHumanPlaying;
+                    gameType.CurrentPlayer.ClearedSpecificLine += gameView.OnLocationEntered;
 
                     playerMove = gameType.CurrentPlayer.ChooseMove(game.SubBoards);
 
-                    playerMove.Board.UpdateBoardPieces += boardView.OnBoardUpdated;
-                    playerMove.Board.SubBoardHaveOwner += game.SummaryBoard.OnSubBoardHaveOwner;
+                    playerMove.Board.UpdatedBoardPieces += boardView.OnBoardUpdated;
+                    playerMove.Board.UpdatedSubBoardWinner += game.SummaryBoard.OnSubBoardWinnerUpdated;
 
                     playerMove.Board.UpdateBoard(playerMove);
-                    playerMove.Board.HaveOwner(game.SummaryBoard);
-                    game.SummaryBoard.HaveOwner(game.SummaryBoard);
+                    playerMove.Board.HaveWinner(game.SummaryBoard);
+                    game.SummaryBoard.HaveWinner(game.SummaryBoard);
 
                     numberOfTurns++;
                 }
 
-                resetGame = gameView.PrintTheResult(game.SummaryBoard.Owner);
+                resetGame = gameView.PrintTheResult(game.SummaryBoard.Winner);
             }
 ;
         }

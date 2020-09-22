@@ -1,22 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Text;
 
 namespace TicTacToe
 {
-    class SummaryBoard : Board
+    public class SummaryBoard : Board
     {
-        private const int spaceBetweenCells = 4;
-        private const int distanceBetweenBoards = boardDimensions * spaceBetweenCells;
+        private const int SpaceBetweenCells = 4;
+        private const int DistanceBetweenBoards = BoardDimensions * SpaceBetweenCells;
 
         public SummaryBoard() : base()
         {
-            this.BoardIndex = 10;
-            this.BoardOriginLeft = distanceBetweenBoards * boardDimensions + spaceBetweenCells;
-            this.BoardOriginTop = distanceBetweenBoards;
+            BoardIndex = 10;
+            BoardOriginLocation = new Point(DistanceBetweenBoards * BoardDimensions + SpaceBetweenCells, DistanceBetweenBoards);
         }
 
-        public void OnSubBoardHaveOwner(object source, TicTacToeEventArgs args)
+        public void OnSubBoardWinnerUpdated(object source, PlayerMoveEventArgs args)
         {
             args.PlayerMove.Board.UpdateBoard(args.PlayerMove);
         }

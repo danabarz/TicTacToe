@@ -2,25 +2,25 @@
 
 namespace TicTacToe
 {
-    class GameView
+    public class GameView
     {
-        public int textOriginTop = 38;
+        public const int TextOriginTop = 38;
 
-        public void OnPlayerPlayed(object source, TicTacToeEventArgs args)
+        public void OnPlayerPlayed(object source, PlayerEventArgs args)
         {
-            if (args.NumberOfTimes != 0)
+            if (args.CountTimes != 0)
             {
-                ClearCurrentConsoleLine(Console.CursorLeft, textOriginTop);
+                ClearCurrentConsoleLine(Console.CursorLeft, TextOriginTop);
             }
             SetBaseTextPosition();
             SetBaseColor();
             Console.WriteLine(args.Player.PlayerName + " Turn");
         }
 
-        public void OnHumanPlaying(object source, TicTacToeEventArgs args)
+        public void OnHumanPlaying(object source, IntEventArgs args)
         {
-            Console.SetCursorPosition(Console.CursorLeft, textOriginTop + 1);
-            if (args.NumberOfTimes == 1)
+            Console.SetCursorPosition(Console.CursorLeft, TextOriginTop + 1);
+            if (args.CountTimes == 1)
             {
                 Console.WriteLine("Please enter sub board and cell: ");
             }
@@ -33,7 +33,7 @@ namespace TicTacToe
         public void OnLocationEntered(object source, EventArgs args)
         {
             ClearCurrentConsoleLine(Console.CursorLeft, Console.CursorTop - 1);
-            ClearCurrentConsoleLine(Console.CursorLeft, textOriginTop + 1);
+            ClearCurrentConsoleLine(Console.CursorLeft, TextOriginTop + 1);
         }
 
         public void OnSelectingGameType(object source, EventArgs args)
@@ -41,12 +41,12 @@ namespace TicTacToe
             Console.WriteLine("\nPlease select game type: \n1) Human Vs Human \n2) Human Vs Computer ");
         }
 
-        public void OnHumanVsHumanTypeSelected(object source, TicTacToeEventArgs args)
+        public void OnHumanVsHumanTypeSelected(object source, IntEventArgs args)
         {
-            Console.WriteLine("\nPlayer {0} - Please write your name: ", args.NumberOfTimes);
+            Console.WriteLine("\nPlayer {0} - Please write your name: ", args.CountTimes);
         }
 
-        public void OnPrintBoardView(object source, EventArgs args)
+        public void OnPrintedBoardView(object source, EventArgs args)
         {
             SetBaseColor();
         }
@@ -121,9 +121,6 @@ namespace TicTacToe
             Console.WriteLine("   \\   \\ .'             \\   \\  |--\"   `----'  |   |/      |    |`.  ");
             Console.WriteLine("    `---`                \\   \\ |              '---'       `-- -`, ; ");
             Console.WriteLine("                          '---\"                             '---`\"  ");
-
-
-
         }
 
         public void PrintHomePage()
@@ -155,7 +152,7 @@ namespace TicTacToe
 
         private void SetBaseTextPosition()
         {
-            Console.SetCursorPosition(0, textOriginTop);
+            Console.SetCursorPosition(0, TextOriginTop);
         }
 
         private void ClearCurrentConsoleLine(int originLeft, int originTop)

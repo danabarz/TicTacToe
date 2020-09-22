@@ -1,37 +1,35 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Text;
 
 namespace TicTacToe
 {
-     class BoardView
+     public class BoardView
      {
-        private const int printBoardStartLocation = 2;
-        private const int spaceBetweenPieces = 4;
-        private const int boardDimensions = 3;
-        private const int distanceBetweenBoards = boardDimensions * spaceBetweenPieces;
-        private const int numberOfSubBOards = boardDimensions * boardDimensions;
+        private const int PrintBoardStartLocation = 2;
+        private const int SpaceBetweenPieces = 4;
+        private const int BoardDimensions = 3;
+        private const int DistanceBetweenBoards = BoardDimensions * SpaceBetweenPieces;
+        private const int NumberOfSubBoards = BoardDimensions * BoardDimensions;
 
-        public event EventHandler<EventArgs> SetColorBoard;
+        public event EventHandler<EventArgs> ChangedBoardColor;
 
-        protected virtual void OnPrintBoardView()
+        protected virtual void OnPrintedBoardView()
         {
-            if (SetColorBoard != null)
-            {
-                SetColorBoard(this, EventArgs.Empty);
-            }
+            ChangedBoardColor?.Invoke(this, EventArgs.Empty);
         }
         
         public void PrintBoardView(Board gameBoard)
         {
-            Console.SetCursorPosition(gameBoard.BoardOriginLeft, gameBoard.BoardOriginTop);
-            for (int i = gameBoard.BoardOriginLeft; i <= gameBoard.BoardOriginLeft + distanceBetweenBoards; i += spaceBetweenPieces)
+            Console.SetCursorPosition(gameBoard.BoardOriginLocation.X, gameBoard.BoardOriginLocation.Y);
+            for (int i = gameBoard.BoardOriginLocation.X; i <= gameBoard.BoardOriginLocation.X + DistanceBetweenBoards; i += SpaceBetweenPieces)
             {
-                for (int j = gameBoard.BoardOriginTop; j <= gameBoard.BoardOriginTop + distanceBetweenBoards; j++)
+                for (int j = gameBoard.BoardOriginLocation.Y; j <= gameBoard.BoardOriginLocation.Y + DistanceBetweenBoards; j++)
                 {
-                    if (i <= distanceBetweenBoards * boardDimensions && i % distanceBetweenBoards == 0 || i <= distanceBetweenBoards * boardDimensions && j % distanceBetweenBoards == 0)
+                    if (i <= DistanceBetweenBoards * BoardDimensions && i % DistanceBetweenBoards == 0 || i <= DistanceBetweenBoards * BoardDimensions && j % DistanceBetweenBoards == 0)
                     {
-                        OnPrintBoardView();
+                        OnPrintedBoardView();
                     }
                     else
                     {
@@ -42,13 +40,13 @@ namespace TicTacToe
                 }
             }
 
-            for (int j = gameBoard.BoardOriginTop; j <= gameBoard.BoardOriginTop + distanceBetweenBoards; j += spaceBetweenPieces)
+            for (int j = gameBoard.BoardOriginLocation.Y; j <= gameBoard.BoardOriginLocation.Y + DistanceBetweenBoards; j += SpaceBetweenPieces)
             {
-                for (int i = gameBoard.BoardOriginLeft; i <= gameBoard.BoardOriginLeft + distanceBetweenBoards; i++)
+                for (int i = gameBoard.BoardOriginLocation.X; i <= gameBoard.BoardOriginLocation.X + DistanceBetweenBoards; i++)
                 {
-                    if (i <= distanceBetweenBoards * boardDimensions && i % distanceBetweenBoards == 0 || i <= distanceBetweenBoards * boardDimensions && j % distanceBetweenBoards == 0)
+                    if (i <= DistanceBetweenBoards * BoardDimensions && i % DistanceBetweenBoards == 0 || i <= DistanceBetweenBoards * BoardDimensions && j % DistanceBetweenBoards == 0)
                     {
-                        OnPrintBoardView();
+                        OnPrintedBoardView();
                     }
                     else
                     {
@@ -60,29 +58,29 @@ namespace TicTacToe
             }
         }
 
-        private void PrintPieces(PlayerMarker?[,] gameBoard, int boardOriginLeft, int boardOriginTop)
+        private void PrintMarkers(PlayerMarker?[,] gameBoard, Point BoardOriginLocation)
         {
-            for (int row = 0; row < boardDimensions; row++)
+            for (int row = 0; row < BoardDimensions; row++)
             {
-                for (int col = 0; col < boardDimensions; col++)
+                for (int col = 0; col < BoardDimensions; col++)
                 {
                     Console.ForegroundColor = ConsoleColor.Yellow;
-                    Console.SetCursorPosition(boardOriginLeft + printBoardStartLocation + col * spaceBetweenPieces, boardOriginTop + printBoardStartLocation + row * spaceBetweenPieces);
+                    Console.SetCursorPosition(BoardOriginLocation.X + PrintBoardStartLocation + col * SpaceBetweenPieces, BoardOriginLocation.Y + PrintBoardStartLocation + row * SpaceBetweenPieces);
                     Console.Write(gameBoard[row, col]);
                 }
                 Console.WriteLine();
             }
         }
 
-        public void OnBoardUpdated(object source, TicTacToeEventArgs args)
+        public void OnBoardUpdated(object source, BoardEventArgs args)
         {
-            PrintPieces(args.GameBoard, args.BoardOriginLeft, args.BoardOriginTop);
+            PrintMarkers(args.GameBoard, args.BoardOriginLocation);
         }
 
-        public void OnBoardsInitialized(object source, TicTacToeEventArgs args)
+        public void OnBoardsInitialized(object source, GameEventArgs args)
         {
             PrintBoardView(args.SummaryBoard);
-            for (int i = 0; i < numberOfSubBOards; i++)
+            for (int i = 0; i < NumberOfSubBoards; i++)
             {
                 PrintBoardView(args.SubBoards[i]);
             }

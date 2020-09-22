@@ -3,47 +3,40 @@ using System.Collections.Generic;
 
 namespace TicTacToe
 {
-    class Game
+    public class Game
     {
-        private const int boardDimensions = 3;
-        private const int spaceBetweenCells = 4;
-        private const int distanceBetweenBoards = boardDimensions * spaceBetweenCells;
+        private const int BoardDimensions = 3;
+        private const int SpaceBetweenCells = 4;
+        private const int DistanceBetweenBoards = BoardDimensions * SpaceBetweenCells;
+        private const int IndexGameTypeOne = 1;
+        private const int IndexGameTypeTwo = 2;
+
 
         public Game()
         {
-            this.SummaryBoard = new SummaryBoard();
-            this.SubBoards = new List<SubBoard>();
+            SummaryBoard = new SummaryBoard();
+            SubBoards = new List<SubBoard>();
         }
 
-        public event EventHandler<TicTacToeEventArgs> PrintBoards;
-        public event EventHandler<EventArgs> AskGameType;
-        public event EventHandler<TicTacToeEventArgs> AskPlayersName;
+        public event EventHandler<GameEventArgs> PrintingBoards;
+        public event EventHandler<EventArgs> AskingGameType;
+        public event EventHandler<IntEventArgs> AskingPlayersName;
 
         public SummaryBoard SummaryBoard { get; set; }
         public List<SubBoard> SubBoards { get; set; }
-
-        protected virtual void OnBoardsInitialized(List<SubBoard> subBoards, SummaryBoard summaryBoard)
+        protected void OnBoardsInitialized(List<SubBoard> subBoards, SummaryBoard summaryBoard)
         {
-            if (PrintBoards != null)
-            {
-                PrintBoards(this, new TicTacToeEventArgs() { SubBoards = subBoards, SummaryBoard = summaryBoard });
-            }
+            PrintingBoards?.Invoke(this, new GameEventArgs { SubBoards = subBoards, SummaryBoard = summaryBoard });
         }
 
-        protected virtual void OnGameTypeSelected()
+        protected void OnSelectingGameType()
         {
-            if (AskGameType != null)
-            {
-                AskGameType(this, EventArgs.Empty);
-            }
+            AskingGameType?.Invoke(this, EventArgs.Empty);
         }
 
-        protected virtual void OnHumanVsHumanTypeSelected(int number)
+        protected void OnHumanVsHumanTypeSelected(int number)
         {
-            if (AskPlayersName != null)
-            {
-                AskPlayersName(this, new TicTacToeEventArgs() { NumberOfTimes = number });
-            }
+            AskingPlayersName?.Invoke(this, new IntEventArgs { CountTimes = number });
         }
 
         public GameType InitGameType()
@@ -52,36 +45,39 @@ namespace TicTacToe
             int gameTypeNumber;
             do
             {
-                OnGameTypeSelected();
+                OnSelectingGameType();
                 string gameTypeString = Console.ReadLine();
                 Console.Clear();
                 isIntEnterd = int.TryParse(gameTypeString, out gameTypeNumber);
             }
-            while (!isIntEnterd || gameTypeNumber > 2 || gameTypeNumber < 1);
-            if (gameTypeNumber == 1)
+            while (!isIntEnterd || gameTypeNumber > IndexGameTypeTwo || gameTypeNumber < IndexGameTypeOne);
+
+            if (gameTypeNumber == IndexGameTypeOne)
             {
-                OnHumanVsHumanTypeSelected(1);
+                OnHumanVsHumanTypeSelected(IndexGameTypeOne);
                 string player1 = Console.ReadLine();
-                OnHumanVsHumanTypeSelected(2);
+                OnHumanVsHumanTypeSelected(IndexGameTypeTwo);
                 string player2 = Console.ReadLine();
+
                 Console.Clear();
+
                 return new HumanVsHuman(player1, player2);
             }
-            return new HumanVsComputer();;
+            return new HumanVsComputer();
         }
 
         public void InitBoards()
         {
             int boardIndex = 0;
-            for (int y = 0; y < distanceBetweenBoards * boardDimensions; y += distanceBetweenBoards)
+            for (int y = 0; y < DistanceBetweenBoards * BoardDimensions; y += DistanceBetweenBoards)
             {
-                for (int x = 0; x < distanceBetweenBoards * boardDimensions; x += distanceBetweenBoards)
+                for (int x = 0; x < DistanceBetweenBoards * BoardDimensions; x += DistanceBetweenBoards)
                 {
                     this.SubBoards.Add(new SubBoard(boardIndex, x, y));
                     boardIndex++;
                 }
             }
-            OnBoardsInitialized(this.SubBoards, this.SummaryBoard);
+            OnBoardsInitialized(SubBoards, SummaryBoard);
         }
 
     }

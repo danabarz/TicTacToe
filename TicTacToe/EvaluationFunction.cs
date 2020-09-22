@@ -4,7 +4,7 @@ using System.Text;
 
 namespace TicTacToe
 {
-    class EvaluationFunction
+    public class EvaluationFunction
     {
         public int Evaluate(Board gameBoard, PlayerMarker playerMarker)
         {

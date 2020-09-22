@@ -1,25 +1,27 @@
 ﻿
 namespace TicTacToe
 {
-    class HumanVsComputer : GameType
+    public class HumanVsComputer : GameType
     {
         public HumanVsComputer()
         {
-            this.ComputerPlayer = new ComputerPlayer();
-            this.CurrentPlayer = ComputerPlayer;
+            HumanPlayer = new HumanPlayer();
+            ComputerPlayer = new ComputerPlayer();
+            CurrentPlayer = ComputerPlayer;
         }
+        private ComputerPlayer ComputerPlayer { get; set; }
+        private HumanPlayer HumanPlayer { get; set; }
 
-        public ComputerPlayer ComputerPlayer { get; set; }
 
         public override Player SwitchPlayer()
         {
-            if (this.HumanPlayer1.GetType().Equals(this.CurrentPlayer.GetType()))
+            if (HumanPlayer.GetType().Equals(CurrentPlayer.GetType()))
             {
-                return this.ComputerPlayer;
+                return ComputerPlayer;
             }
             else
             {
-                return this.HumanPlayer1;
+                return HumanPlayer;
             }
         }
     }

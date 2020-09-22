@@ -5,7 +5,7 @@ using System.Threading;
 
 namespace TicTacToe
 {
-    class ComputerPlayer : Player
+    public class ComputerPlayer : Player
     {
         public ComputerPlayer()
         {
@@ -15,19 +15,9 @@ namespace TicTacToe
 
         public override PlayerMove ChooseMove(List<SubBoard> subBoards)
         {
-            //todo: another way to decide in which sub board to play!!
-            MiniMax miniMax = new MiniMax();
-
-            foreach (SubBoard i in subBoards)
-            {
-                if (i.Owner == null)
-                {
-                    return miniMax.FindBestMove(i, this.IdPlayer);
-                }
-            }
-            return null;
+            var miniMax = new MiniMax();
+            return miniMax.FindBestMove(subBoards, this.IdPlayer);
         }
-
 
         /*
         private readonly Random rand = new Random();
