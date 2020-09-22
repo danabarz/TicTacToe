@@ -66,7 +66,14 @@ namespace TicTacToe
                 {
                     Console.ForegroundColor = ConsoleColor.Yellow;
                     Console.SetCursorPosition(BoardOriginLocation.X + PrintBoardStartLocation + col * SpaceBetweenPieces, BoardOriginLocation.Y + PrintBoardStartLocation + row * SpaceBetweenPieces);
-                    Console.Write(gameBoard[row, col]);
+                    if (gameBoard[row, col] == PlayerMarker.Tie)
+                    {
+                        Console.Write("-");
+                    }
+                    else
+                    {
+                        Console.Write(gameBoard[row, col]);
+                    }
                 }
                 Console.WriteLine();
             }

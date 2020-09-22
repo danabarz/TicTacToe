@@ -15,9 +15,18 @@ namespace TicTacToe
 
         public override PlayerMove ChooseMove(List<SubBoard> subBoards)
         {
+            //todo: check first the last sub board that was updated and just after that check the other sub boards
             var miniMax = new MiniMax();
-            return miniMax.FindBestMove(subBoards, this.IdPlayer);
+            foreach (SubBoard i in subBoards)
+            {
+                if (i.Winner == null)
+                {
+                    return miniMax.FindBestMove(i, this.IdPlayer);
+                }
+            }
+            return null;
         }
+   
 
         /*
         private readonly Random rand = new Random();

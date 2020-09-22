@@ -33,7 +33,7 @@ namespace TicTacToe
             UpdatedSubBoardWinner?.Invoke(this, new PlayerMoveEventArgs { PlayerMove = playerMove });
         }
 
-                public int GetRow(int index)
+        public int GetRow(int index)
         {
             return index / BoardDimensions;
         }
@@ -51,7 +51,7 @@ namespace TicTacToe
             }
         }
 
-        //todo: not good
+        //todo: sub boards shouldn't know about the summary board
         public void HaveWinner(Board gameBoard)
         {
             PlayerMarker? winnerMarker = CheckIfGameOver();

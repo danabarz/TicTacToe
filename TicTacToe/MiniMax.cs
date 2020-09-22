@@ -53,8 +53,51 @@ namespace TicTacToe
                 return best;
             }
         }
+        public PlayerMove FindBestMove(Board gameBoard, PlayerMarker playerMarker)
+        {
+            int bestVal = int.MinValue;
+            int row = -1;
+            int col = -1;
 
-        //todo: improve this method
+            for (int i = 0; i < BoardDimensions; i++)
+            {
+                for (int j = 0; j < BoardDimensions; j++)
+                {
+                    if (gameBoard.GameBoard[i, j] == null)
+                    {
+                        gameBoard.GameBoard[i, j] = playerMarker;
+                        int moveVal = Minimax(gameBoard, 0, false, playerMarker);
+                        gameBoard.GameBoard[i, j] = null;
+                        if (moveVal > bestVal)
+                        {
+                            row = i;
+                            col = j;
+                            bestVal = moveVal;
+                        }
+                    }
+                }
+            }
+            return new PlayerMove(gameBoard, row, col, playerMarker);
+        }
+
+        private Tuple<int, int> TravrseBoardCell(Board gameBoard, PlayerMarker playerMarker)
+        {
+            for (int i = 0; i < BoardDimensions; i++)
+            {
+                for (int j = 0; j < BoardDimensions; j++)
+                {
+                    if (gameBoard.GameBoard[i, j] == null)
+                    {
+                        return Tuple.Create(i, j);
+                    }
+                }
+            }
+            return null;
+        }
+
+
+
+        /*
         public PlayerMove FindBestMove(List<SubBoard> subBoards, PlayerMarker playerMarker)
         {
 
@@ -85,57 +128,12 @@ namespace TicTacToe
                                 col = j;
                                 bestVal = moveVal;
                                 bestSubBoard = board;
-                            }                                                      
+                            }
                         }
                     }
                 }
             }
             return new PlayerMove(bestSubBoard, row, col, playerMarker);
-        }
-
-
-        private Tuple<int, int> TravrseBoardCell(Board gameBoard, PlayerMarker playerMarker)
-        {
-            for (int i = 0; i < BoardDimensions; i++)
-            {
-                for (int j = 0; j < BoardDimensions; j++)
-                {
-                    if (gameBoard.GameBoard[i, j] == null)
-                    {
-                        return Tuple.Create(i, j);
-                    }
-                }
-            }
-            return null;
-        }
-
-        
-        /*
-        public PlayerMove FindBestMove(Board gameBoard, PlayerMarker playerMarker)
-        { 
-            int bestVal = int.MinValue;
-            int row = -1;
-            int col = -1;
-
-            for (int i = 0; i < BoardDimensions; i++)
-            {
-                for (int j = 0; j < BoardDimensions; j++)
-                {
-                    if (gameBoard.GameBoard[i, j] == null)
-                    {
-                        gameBoard.GameBoard[i, j] = playerMarker;
-                        int moveVal = Minimax(gameBoard, 0, false, playerMarker);
-                        gameBoard.GameBoard[i, j] = null;
-                        if (moveVal > bestVal)
-                        {
-                            row = i;
-                            col = j;
-                            bestVal = moveVal;
-                        }
-                    }
-                }
-            }
-            return new PlayerMove(gameBoard, row, col, playerMarker);
         }*/
     }
 }
