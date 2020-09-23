@@ -10,8 +10,8 @@ namespace TicTacToe
         public event EventHandler<IntEventArgs> PrintingHumanOutput;
         public event EventHandler<EventArgs> ClearedSpecificLine;
 
-        public PlayerMarker IdPlayer { get; set; }
-        public string PlayerName { get; set; }
+        public PlayerMarker IdPlayer { get; protected set; }
+        public string PlayerName { get; protected set; }
 
         protected void OnHumanPlaying(int numberOfAttempts)
         {

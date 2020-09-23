@@ -7,7 +7,7 @@ namespace TicTacToe
 {
     public abstract class Board
     {
-        public const int BoardDimensions = 3;
+        protected const int BoardDimensions = 3;
 
         public Board()
         {
@@ -18,9 +18,10 @@ namespace TicTacToe
         public event EventHandler<BoardEventArgs> UpdatedBoardPieces;
         public event EventHandler<PlayerMoveEventArgs> UpdatedSubBoardWinner;
 
-        public PlayerMarker?[,] GameBoard { get; set; }
-        public PlayerMarker? Winner { get; set; }
-        public Point BoardOriginLocation { get; set; }
+        public PlayerMarker?[,] GameBoard { get; }
+        public PlayerMarker? Winner { get; protected set; }
+    
+        public Point BoardOriginLocation { get; protected set; }
         protected int BoardIndex { get; set; }
 
         protected void OnBoardUpdated()

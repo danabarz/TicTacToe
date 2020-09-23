@@ -10,8 +10,8 @@ namespace TicTacToe
             CurrentPlayer = HumanPlayer2;
         }
 
-        private HumanPlayer HumanPlayer1 { get; set; }
-        private HumanPlayer HumanPlayer2 { get; set; }
+        private HumanPlayer HumanPlayer1 { get; }
+        private HumanPlayer HumanPlayer2 { get; }
 
         public override Player SwitchPlayer()
         {

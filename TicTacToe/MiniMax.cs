@@ -7,7 +7,7 @@ namespace TicTacToe
     public class MiniMax
     {
         private const int BoardDimensions = 3;
-        private readonly Random rand = new Random();
+
         readonly EvaluationFunction evaluateFunction = new EvaluationFunction();
 
 
@@ -53,6 +53,7 @@ namespace TicTacToe
                 return best;
             }
         }
+
         public PlayerMove FindBestMove(Board gameBoard, PlayerMarker playerMarker)
         {
             int bestVal = int.MinValue;

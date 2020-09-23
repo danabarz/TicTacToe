@@ -7,8 +7,7 @@ namespace TicTacToe
 
         public event EventHandler<PlayerEventArgs> MangedPlayerTurns;
 
-        public Player CurrentPlayer { get; set; }
-        //public HumanPlayer HumanPlayer1 { get; set; }
+        public Player CurrentPlayer { get; protected set; }
 
         public abstract Player SwitchPlayer();
 

@@ -22,8 +22,11 @@ namespace TicTacToe
         public event EventHandler<EventArgs> AskingGameType;
         public event EventHandler<IntEventArgs> AskingPlayersName;
 
-        public SummaryBoard SummaryBoard { get; set; }
-        public List<SubBoard> SubBoards { get; set; }
+        public SummaryBoard SummaryBoard { get; }
+
+        //todo: create matrix [,] 
+        public List<SubBoard> SubBoards { get; }
+
         protected void OnBoardsInitialized(List<SubBoard> subBoards, SummaryBoard summaryBoard)
         {
             PrintingBoards?.Invoke(this, new GameEventArgs { SubBoards = subBoards, SummaryBoard = summaryBoard });

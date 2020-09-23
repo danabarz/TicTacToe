@@ -13,9 +13,9 @@ namespace TicTacToe
             Column = column;
             Marker = marker;
         }
-        public Board Board { get; set; }
-        public int Row { get; set; }
-        public int Column { get; set; }
-        public PlayerMarker? Marker { get; set; }
+        public Board Board { get; }
+        public int Row { get; }
+        public int Column { get; }
+        public PlayerMarker? Marker { get; }
     }
 }

@@ -13,6 +13,9 @@ namespace TicTacToe
         private const int DistanceBetweenBoards = BoardDimensions * SpaceBetweenPieces;
         private const int NumberOfSubBoards = BoardDimensions * BoardDimensions;
 
+
+
+        //todo: create constructor with board origin location - get board as parmater
         public event EventHandler<EventArgs> ChangedBoardColor;
 
         protected virtual void OnPrintedBoardView()

@@ -9,8 +9,8 @@ namespace TicTacToe
             ComputerPlayer = new ComputerPlayer();
             CurrentPlayer = ComputerPlayer;
         }
-        private ComputerPlayer ComputerPlayer { get; set; }
-        private HumanPlayer HumanPlayer { get; set; }
+        private ComputerPlayer ComputerPlayer { get; }
+        private HumanPlayer HumanPlayer { get; }
 
 
         public override Player SwitchPlayer()
