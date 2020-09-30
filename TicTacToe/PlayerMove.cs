@@ -1,21 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
+﻿
 namespace TicTacToe
 {
     public class PlayerMove
     {
+        public Board _board;
+        public int _row;
+        public int _column;
+        public PlayerMarker? _marker;
+
         public PlayerMove(Board board, int row, int column, PlayerMarker? marker)
         {
-            Board = board;
-            Row = row;
-            Column = column;
-            Marker = marker;
+            _board = board;
+            _row = row;
+            _column = column;
+            _marker = marker;
         }
-        public Board Board { get; }
-        public int Row { get; }
-        public int Column { get; }
-        public PlayerMarker? Marker { get; }
     }
 }

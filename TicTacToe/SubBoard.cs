@@ -1,16 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Text;
-
+﻿
 namespace TicTacToe
 {
     public class SubBoard : Board
     {
-        public SubBoard(int subBoardIndex, int boardOriginLeft, int boardOriginTop) : base()
+        public SubBoard(int row, int col) : base()
         {
-            BoardIndex = subBoardIndex;
-            BoardOriginLocation = new Point(boardOriginLeft, boardOriginTop);
+            Row = row;
+            Column = col;
         }
     }
 }

@@ -1,12 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace TicTacToe
 {
     public abstract class Player
     {
-        protected const int BoardDimensions = 3;
-
         public event EventHandler<IntEventArgs> PrintingHumanOutput;
         public event EventHandler<EventArgs> ClearedSpecificLine;
 
@@ -15,7 +12,7 @@ namespace TicTacToe
 
         protected void OnHumanPlaying(int numberOfAttempts)
         {
-            PrintingHumanOutput?.Invoke(this, new IntEventArgs { CountTimes = numberOfAttempts });
+            PrintingHumanOutput?.Invoke(this, new IntEventArgs { Count = numberOfAttempts });
         }
 
         protected void OnLocationEntered()
@@ -23,6 +20,6 @@ namespace TicTacToe
             ClearedSpecificLine?.Invoke(this, EventArgs.Empty);
         }
 
-        public abstract PlayerMove ChooseMove(List<SubBoard> subBoards);
+        public abstract PlayerMove ChooseMove(Game game);
     }
 }

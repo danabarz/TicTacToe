@@ -1,23 +1,17 @@
-﻿using System.Drawing;
-
+﻿
 namespace TicTacToe
 {
     public class SummaryBoard : Board
     {
-        private const int SpaceBetweenCells = 4;
-        private const int DistanceBetweenBoards = BoardDimensions * SpaceBetweenCells;
-
         public SummaryBoard() : base()
         {
-            BoardIndex = 10;
-            BoardOriginLocation = new Point(DistanceBetweenBoards * BoardDimensions + SpaceBetweenCells, DistanceBetweenBoards);
+            Column = Dimensions;
         }
 
         public void OnSubBoardWinnerUpdated(object source, PlayerMoveEventArgs args)
         {
-            args.PlayerMove.Board.UpdateBoard(args.PlayerMove);
+            UpdateBoard(args.PlayerMove);
         }
-
     }
 }
 

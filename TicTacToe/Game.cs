@@ -1,87 +1,76 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace TicTacToe
 {
     public class Game
     {
-        private const int BoardDimensions = 3;
-        private const int SpaceBetweenCells = 4;
-        private const int DistanceBetweenBoards = BoardDimensions * SpaceBetweenCells;
         private const int IndexGameTypeOne = 1;
         private const int IndexGameTypeTwo = 2;
-
+        public SummaryBoard _summaryBoard;
+        public SubBoard[,] _subBoards;
+        public GameType _gameType;
 
         public Game()
         {
-            SummaryBoard = new SummaryBoard();
-            SubBoards = new List<SubBoard>();
+            _summaryBoard = new SummaryBoard();
+            _subBoards = new SubBoard[_summaryBoard.Dimensions, _summaryBoard.Dimensions];
         }
 
-        public event EventHandler<GameEventArgs> PrintingBoards;
+        public event EventHandler<GameEventArgs> InitializedSubBoardsView;
         public event EventHandler<EventArgs> AskingGameType;
         public event EventHandler<IntEventArgs> AskingPlayersName;
 
-        public SummaryBoard SummaryBoard { get; }
-
-        //todo: create matrix [,] 
-        public List<SubBoard> SubBoards { get; }
-
-        protected void OnBoardsInitialized(List<SubBoard> subBoards, SummaryBoard summaryBoard)
+        private void OnSubBoardsInitialized(SubBoard[,] SubBoards)
         {
-            PrintingBoards?.Invoke(this, new GameEventArgs { SubBoards = subBoards, SummaryBoard = summaryBoard });
+            InitializedSubBoardsView?.Invoke(this, new GameEventArgs { SubBoards = SubBoards });
         }
 
-        protected void OnSelectingGameType()
+        private void OnSelectingGameType()
         {
             AskingGameType?.Invoke(this, EventArgs.Empty);
         }
 
-        protected void OnHumanVsHumanTypeSelected(int number)
+        private void OnHumanVsHumanTypeSelected(int number)
         {
-            AskingPlayersName?.Invoke(this, new IntEventArgs { CountTimes = number });
+            AskingPlayersName?.Invoke(this, new IntEventArgs { Count = number });
         }
 
-        public GameType InitGameType()
+        public void InitGameType()
         {
-            bool isIntEnterd;
-            int gameTypeNumber;
+            bool isValidInput;
+            int gameTypeIndex;
             do
             {
                 OnSelectingGameType();
                 string gameTypeString = Console.ReadLine();
-                Console.Clear();
-                isIntEnterd = int.TryParse(gameTypeString, out gameTypeNumber);
+                isValidInput = int.TryParse(gameTypeString, out gameTypeIndex);
             }
-            while (!isIntEnterd || gameTypeNumber > IndexGameTypeTwo || gameTypeNumber < IndexGameTypeOne);
+            while (!isValidInput || gameTypeIndex > IndexGameTypeTwo || gameTypeIndex < IndexGameTypeOne);
 
-            if (gameTypeNumber == IndexGameTypeOne)
+            if (gameTypeIndex == IndexGameTypeOne)
             {
                 OnHumanVsHumanTypeSelected(IndexGameTypeOne);
                 string player1 = Console.ReadLine();
                 OnHumanVsHumanTypeSelected(IndexGameTypeTwo);
                 string player2 = Console.ReadLine();
-
-                Console.Clear();
-
-                return new HumanVsHuman(player1, player2);
+                _gameType = new HumanVsHuman(player1, player2);
             }
-            return new HumanVsComputer();
+            else
+            {
+                _gameType = new HumanVsComputer();
+            }
         }
 
-        public void InitBoards()
+        public void InitSubBoards()
         {
-            int boardIndex = 0;
-            for (int y = 0; y < DistanceBetweenBoards * BoardDimensions; y += DistanceBetweenBoards)
+            for (int i = 0; i < _summaryBoard.Dimensions; i++)
             {
-                for (int x = 0; x < DistanceBetweenBoards * BoardDimensions; x += DistanceBetweenBoards)
+                for (int j = 0; j < _summaryBoard.Dimensions; j++)
                 {
-                    this.SubBoards.Add(new SubBoard(boardIndex, x, y));
-                    boardIndex++;
+                    _subBoards[i, j] = new SubBoard(i, j);
                 }
             }
-            OnBoardsInitialized(SubBoards, SummaryBoard);
+            OnSubBoardsInitialized(_subBoards);
         }
-
     }
 }

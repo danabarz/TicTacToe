@@ -3,17 +3,17 @@ namespace TicTacToe
 {
     public class HumanVsComputer : GameType
     {
+        private readonly ComputerPlayer ComputerPlayer;
+        private readonly HumanPlayer HumanPlayer;
+
         public HumanVsComputer()
         {
             HumanPlayer = new HumanPlayer();
             ComputerPlayer = new ComputerPlayer();
             CurrentPlayer = ComputerPlayer;
         }
-        private ComputerPlayer ComputerPlayer { get; }
-        private HumanPlayer HumanPlayer { get; }
 
-
-        public override Player SwitchPlayer()
+        protected override Player SwitchPlayer()
         {
             if (HumanPlayer.GetType().Equals(CurrentPlayer.GetType()))
             {

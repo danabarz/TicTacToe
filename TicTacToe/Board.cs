@@ -1,77 +1,64 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.Common;
-using System.Drawing;
 
 namespace TicTacToe
 {
     public abstract class Board
     {
-        protected const int BoardDimensions = 3;
-
+        public readonly int Dimensions = 3;
         public Board()
         {
-            GameBoard = new PlayerMarker?[BoardDimensions, BoardDimensions];
+            GameBoard = new PlayerMarker?[Dimensions, Dimensions];
             Winner = null;
         }
 
         public event EventHandler<BoardEventArgs> UpdatedBoardPieces;
         public event EventHandler<PlayerMoveEventArgs> UpdatedSubBoardWinner;
 
-        public PlayerMarker?[,] GameBoard { get; }
-        public PlayerMarker? Winner { get; protected set; }
-    
-        public Point BoardOriginLocation { get; protected set; }
-        protected int BoardIndex { get; set; }
+        public PlayerMarker?[,] GameBoard { get; private set; }
+        public PlayerMarker? Winner { get; private set; }
+        public int Row { get; protected set; }
+        public int Column { get; protected set; }
 
-        protected void OnBoardUpdated()
+        private void OnBoardUpdated(Board board)
         {
-            UpdatedBoardPieces?.Invoke(this, new BoardEventArgs { GameBoard = this.GameBoard, BoardOriginLocation = this.BoardOriginLocation });
+            UpdatedBoardPieces?.Invoke(this, new BoardEventArgs { GameBoard = board});
         }
 
-        protected void OnSubBoardWinnerUpdated(PlayerMove playerMove)
+        private void OnSubBoardWinnerUpdated(PlayerMove playerMove)
         {
             UpdatedSubBoardWinner?.Invoke(this, new PlayerMoveEventArgs { PlayerMove = playerMove });
         }
 
-        public int GetRow(int index)
-        {
-            return index / BoardDimensions;
-        }
-        public int GetColumn(int index)
-        {
-            return index % BoardDimensions;
-        }
-
         public void UpdateBoard(PlayerMove playerMove)
         {
-            if (GameBoard[playerMove.Row, playerMove.Column] == null)
+            if (GameBoard[playerMove._row, playerMove._column] == null)
             {
-                GameBoard[playerMove.Row, playerMove.Column] = playerMove.Marker;
-                OnBoardUpdated();
+                GameBoard[playerMove._row, playerMove._column] = playerMove._marker;
+                OnBoardUpdated(playerMove._board);
             }
         }
 
-        //todo: sub boards shouldn't know about the summary board
-        public void HaveWinner(Board gameBoard)
+        public void HaveWinner(Game game)
         {
             PlayerMarker? winnerMarker = CheckIfGameOver();
             if (winnerMarker != null)
             {
                 Winner = winnerMarker;
-                int outerRow = GetRow(this.BoardIndex);
-                int outerCol = GetColumn(this.BoardIndex);
-                var summaryBoardMove = new PlayerMove(gameBoard, outerRow, outerCol, winnerMarker);
-                OnSubBoardWinnerUpdated(summaryBoardMove);
+                if (Column != Dimensions)
+                {
+                    var summaryBoardMove = new PlayerMove(game._summaryBoard, Row, Column, Winner);
+                    OnSubBoardWinnerUpdated(summaryBoardMove);
+                }
             }
         }
 
         public List<Tuple<int, int>> FindOpenMoves()
         {
             var emptyLocationsOnBoard = new List<Tuple<int, int>>();
-            for (int i = 0; i < BoardDimensions; i++)
+            for (int i = 0; i < Dimensions; i++)
             {
-                for (int j = 0; j < BoardDimensions; j++)
+                for (int j = 0; j < Dimensions; j++)
                 {
                     if (GameBoard[i, j] == null)
                     {
@@ -82,20 +69,19 @@ namespace TicTacToe
             return emptyLocationsOnBoard;
         }
 
-        public PlayerMarker? HorizontalWinForGame()
+        private PlayerMarker? HorizontalWinForGame()
         {
-            for (int i = 0; i < BoardDimensions; i++)
+            for (int i = 0; i < Dimensions; i++)
             {
                 int count = 0;
                 PlayerMarker? playerMarkerHorizontal = GameBoard[i, i];
-                for (int j = 0; j < BoardDimensions; j++)
+                for (int j = 0; j < Dimensions; j++)
                 {
                     if (GameBoard[i, j] == playerMarkerHorizontal)
                     {
                         count++;
                     }
-
-                    if (count == BoardDimensions && playerMarkerHorizontal != null && playerMarkerHorizontal != PlayerMarker.Tie)
+                    if (count == Dimensions && playerMarkerHorizontal != null && playerMarkerHorizontal != PlayerMarker.Tie)
                     {
                         return playerMarkerHorizontal;
                     }
@@ -104,20 +90,19 @@ namespace TicTacToe
             return null;
         }
 
-        public PlayerMarker? VerticalWinForGame()
+        private PlayerMarker? VerticalWinForGame()
         {
-            for (int j = 0; j < BoardDimensions; j++)
+            for (int j = 0; j < Dimensions; j++)
             {
                 int count = 0;
                 PlayerMarker? playerMarkerVertical = GameBoard[j, j];
-                for (int i = 0; i < BoardDimensions; i++)
+                for (int i = 0; i < Dimensions; i++)
                 {
                     if (GameBoard[i, j] == playerMarkerVertical)
                     {
                         count++;
                     }
-
-                    if (count == BoardDimensions && playerMarkerVertical != null && playerMarkerVertical != PlayerMarker.Tie)
+                    if (count == Dimensions && playerMarkerVertical != null && playerMarkerVertical != PlayerMarker.Tie)
                     {
                         return playerMarkerVertical;
                     }
@@ -126,15 +111,14 @@ namespace TicTacToe
             return null;
         }
 
-        public PlayerMarker? DiagonalWinForGame()
+        private PlayerMarker? DiagonalWinForGame()
         {
             int count = 0;
             int row = 0;
             int column = 2;
-
             PlayerMarker? playerMarkerDiagonalOne = GameBoard[row, row];
 
-            for (int j = 0; j < BoardDimensions; j++)
+            for (int j = 0; j < Dimensions; j++)
             {
                 if (GameBoard[j, j] == playerMarkerDiagonalOne)
                 {
@@ -142,7 +126,7 @@ namespace TicTacToe
                 }
             }
 
-            if (count == BoardDimensions && playerMarkerDiagonalOne != null && playerMarkerDiagonalOne != PlayerMarker.Tie)
+            if (count == Dimensions && playerMarkerDiagonalOne != null && playerMarkerDiagonalOne != PlayerMarker.Tie)
             {
                 return playerMarkerDiagonalOne;
             }
@@ -150,7 +134,7 @@ namespace TicTacToe
             count = 0;
             PlayerMarker? playerMarkerDiagonalTwo = GameBoard[row, column];
 
-            while (row < BoardDimensions && column >= 0)
+            while (row < Dimensions && column >= 0)
             {
                 if (GameBoard[row, column] == playerMarkerDiagonalTwo)
                 {
@@ -160,18 +144,18 @@ namespace TicTacToe
                 column--;
             }
 
-            if (count == BoardDimensions && playerMarkerDiagonalTwo != null && playerMarkerDiagonalTwo != PlayerMarker.Tie)
+            if (count == Dimensions && playerMarkerDiagonalTwo != null && playerMarkerDiagonalTwo != PlayerMarker.Tie)
             {
                 return playerMarkerDiagonalTwo;
             }
             return null;
         }
 
-        public PlayerMarker? TieWinForGame()
+        private PlayerMarker? TieWinForGame()
         {
-            for (int i = 0; i < BoardDimensions; i++)
+            for (int i = 0; i < Dimensions; i++)
             {
-                for (int j = 0; j < BoardDimensions; j++)
+                for (int j = 0; j < Dimensions; j++)
                 {
                     if (GameBoard[i, j] == null)
                     {

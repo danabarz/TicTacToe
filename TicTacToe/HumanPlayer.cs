@@ -6,9 +6,6 @@ namespace TicTacToe
 {
     public class HumanPlayer : Player
     {
-        private const int NumberOfSubBoards = 9;
-        private Tuple<int, int> boardAndCell;
-
         public HumanPlayer()
         {
             IdPlayer = PlayerMarker.X;
@@ -21,42 +18,59 @@ namespace TicTacToe
             PlayerName = playerName;
         }
 
-        public override PlayerMove ChooseMove(List<SubBoard> subBoards)
+        public override PlayerMove ChooseMove(Game game)
         {
-            int innerRow = int.MinValue;
-            int innerColumn = int.MinValue;
+            int cellRow = int.MinValue;
+            int cellColumn = int.MinValue;
+            int boardColumn = int.MinValue;
+            int boardRow = int.MinValue;
             int numberOfAttempts = 0;
             var SubBoardOpenMoves = new List<Tuple<int, int>>();
-            var rowAndColumn = new Tuple<int, int>(innerRow, innerColumn);
+            var desiredCell = new Tuple<int, int>(cellRow, cellColumn);
+
             do
             {
                 OnHumanPlaying(++numberOfAttempts);
-                boardAndCell = ValidFormatAndRange(Console.ReadLine());
-                if (boardAndCell.Item1 != int.MinValue || boardAndCell.Item2 != int.MinValue)
+                var desiredMove = ValidFormatAndRange(Console.ReadLine(), game._summaryBoard.Dimensions);
+                if (desiredMove.Item1 != int.MinValue || desiredMove.Item2 != int.MinValue)
                 {
-                    SubBoardOpenMoves = subBoards[boardAndCell.Item1].FindOpenMoves();
-                    innerRow = subBoards[boardAndCell.Item1].GetRow(boardAndCell.Item2);
-                    innerColumn = subBoards[boardAndCell.Item1].GetColumn(boardAndCell.Item2);
-                    rowAndColumn = Tuple.Create(innerRow, innerColumn);
+                    boardRow = GetRow(desiredMove.Item1);
+                    boardColumn = GetColumn(desiredMove.Item1);
+                    SubBoardOpenMoves = game._subBoards[boardRow, boardColumn].FindOpenMoves();
+
+                    cellRow =  GetRow(desiredMove.Item2);
+                    cellColumn = GetColumn(desiredMove.Item2);
+                    desiredCell = Tuple.Create(cellRow, cellColumn);
                 }
                 OnLocationEntered();
             }
-            while (!SubBoardOpenMoves.Contains(rowAndColumn));
-            return new PlayerMove(subBoards[boardAndCell.Item1], innerRow, innerColumn, IdPlayer);
+            while (!SubBoardOpenMoves.Contains(desiredCell));
+
+            return new PlayerMove(game._subBoards[boardRow, boardColumn], cellRow, cellColumn, IdPlayer);
+
+            int GetRow(int index)
+            {
+                return index / game._summaryBoard.Dimensions;
+            }
+
+            int GetColumn(int index)
+            {
+                return index % game._summaryBoard.Dimensions;
+            }
         }
 
-        public Tuple<int, int> ValidFormatAndRange(string subBoardAndCellIndex)
+        private Tuple<int, int> ValidFormatAndRange(string subBoardAndCellIndex, int dimension)
         {
             string regexPattern = @"\d[,. ]\d";
             if (Regex.Match(subBoardAndCellIndex, regexPattern).Success)
             {
                 string[] userInput = Regex.Split(subBoardAndCellIndex , @"[,. ]");
-                string strBoardIndex = userInput[0];
+                string strSubBoardIndex = userInput[0];
                 string strCellIndex = userInput[1];
-                bool validBoardIndex = int.TryParse(strBoardIndex, out int subBoardIndex);
-                bool validCellIndex = int.TryParse(strCellIndex, out int cellIndex);
+                bool isSubBoardIndexValid = int.TryParse(strSubBoardIndex, out int subBoardIndex);
+                bool isCellIndexValid = int.TryParse(strCellIndex, out int cellIndex);
 
-                if (validBoardIndex && validCellIndex && subBoardIndex <= NumberOfSubBoards && cellIndex <= NumberOfSubBoards)
+                if (isSubBoardIndexValid && isCellIndexValid && subBoardIndex <= dimension * dimension && cellIndex <= dimension * dimension)
                 {
                     return Tuple.Create(--subBoardIndex, --cellIndex);
                 }

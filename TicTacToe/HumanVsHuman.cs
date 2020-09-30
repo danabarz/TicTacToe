@@ -3,6 +3,9 @@ namespace TicTacToe
 {
     public class HumanVsHuman : GameType
     {
+        private readonly HumanPlayer HumanPlayer1;
+        private readonly HumanPlayer HumanPlayer2;
+
         public HumanVsHuman(string player1Name, string player2Name)
         {
             HumanPlayer1 = new HumanPlayer(PlayerMarker.X, player1Name);
@@ -10,10 +13,7 @@ namespace TicTacToe
             CurrentPlayer = HumanPlayer2;
         }
 
-        private HumanPlayer HumanPlayer1 { get; }
-        private HumanPlayer HumanPlayer2 { get; }
-
-        public override Player SwitchPlayer()
+        protected override Player SwitchPlayer()
         {
             return (CurrentPlayer.IdPlayer == HumanPlayer1.IdPlayer) ? HumanPlayer2 : HumanPlayer1;
         }

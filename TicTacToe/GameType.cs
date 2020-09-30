@@ -4,12 +4,8 @@ namespace TicTacToe
 {
     public abstract class GameType
     {
-
         public event EventHandler<PlayerEventArgs> MangedPlayerTurns;
-
         public Player CurrentPlayer { get; protected set; }
-
-        public abstract Player SwitchPlayer();
 
         public void TurnManager(int numberOfTimes)
         {
@@ -17,10 +13,10 @@ namespace TicTacToe
             OnPlayerPlayed(CurrentPlayer, numberOfTimes);
         }
 
-        protected void OnPlayerPlayed(Player player, int numberOfTimes)
+        private void OnPlayerPlayed(Player player, int numberOfTimes)
         {
-            MangedPlayerTurns?.Invoke(this, new PlayerEventArgs { Player = player, CountTimes = numberOfTimes });
+            MangedPlayerTurns?.Invoke(this, new PlayerEventArgs { Player = player, Count = numberOfTimes });
         }
-
+        protected abstract Player SwitchPlayer();
     }
 }
