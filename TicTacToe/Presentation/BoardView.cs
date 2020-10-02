@@ -1,6 +1,7 @@
 ﻿using System.Drawing;
+using TicTacToe.Logic;
 
-namespace TicTacToe
+namespace TicTacToe.Presentation
 {
     public abstract class BoardView
     {

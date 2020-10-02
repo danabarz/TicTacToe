@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
-namespace TicTacToe
+namespace TicTacToe.Logic
 {
     public class HumanPlayer : Player
     {

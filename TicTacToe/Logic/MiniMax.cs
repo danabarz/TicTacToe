@@ -1,6 +1,7 @@
 ﻿using System;
+using TicTacToe.Logic;
 
-namespace TicTacToe
+namespace TicTacToe.Logic
 {
     public class MiniMax
     {

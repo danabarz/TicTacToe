@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace TicTacToe
+namespace TicTacToe.Logic
 {
     public abstract class Board
     {
@@ -14,7 +14,7 @@ namespace TicTacToe
 
         public event EventHandler<EventArgs> UpdatedBoardPieces;
 
-        public PlayerMarker?[,] GameBoard { get;}
+        public PlayerMarker?[,] GameBoard { get; }
         public PlayerMarker? Winner { get; protected set; }
 
         private void OnBoardUpdated()
@@ -148,13 +148,13 @@ namespace TicTacToe
 
         public PlayerMarker? CheckIfGameOver()
         {
-            var WinnerForBoard = (HorizontalWinForGame() ?? VerticalWinForGame()) ?? (DiagonalWinForGame() ?? TieWinForGame());
+            var WinnerForBoard = (HorizontalWinForGame() ?? VerticalWinForGame()) ?? DiagonalWinForGame() ?? TieWinForGame();
             return WinnerForBoard;
         }
 
         public PlayerMarker GetOponenentPiece(PlayerMarker playerMarker)
         {
-            return (playerMarker == PlayerMarker.X) ? PlayerMarker.O : PlayerMarker.X;
+            return playerMarker == PlayerMarker.X ? PlayerMarker.O : PlayerMarker.X;
         }
     }
 }

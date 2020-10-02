@@ -1,7 +1,7 @@
 ﻿
 using System;
 
-namespace TicTacToe
+namespace TicTacToe.Logic
 {
     public class SubBoard : Board
     {
