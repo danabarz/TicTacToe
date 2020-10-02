@@ -6,6 +6,7 @@ namespace TicTacToe
     {
         private const int IndexGameTypeOne = 1;
         private const int IndexGameTypeTwo = 2;
+
         public SummaryBoard _summaryBoard;
         public SubBoard[,] _subBoards;
         public GameType _gameType;
@@ -13,16 +14,16 @@ namespace TicTacToe
         public Game()
         {
             _summaryBoard = new SummaryBoard();
-            _subBoards = new SubBoard[_summaryBoard.Dimensions, _summaryBoard.Dimensions];
+            _subBoards = new SubBoard[_summaryBoard.dimensions, _summaryBoard.dimensions];
         }
 
-        public event EventHandler<GameEventArgs> InitializedSubBoardsView;
+        public event EventHandler<SubBoardEventArgs> InitializedSubBoardsView;
         public event EventHandler<EventArgs> AskingGameType;
         public event EventHandler<IntEventArgs> AskingPlayersName;
 
         private void OnSubBoardsInitialized(SubBoard[,] SubBoards)
         {
-            InitializedSubBoardsView?.Invoke(this, new GameEventArgs { SubBoards = SubBoards });
+            InitializedSubBoardsView?.Invoke(this, new SubBoardEventArgs { SubBoards = SubBoards });
         }
 
         private void OnSelectingGameType()
@@ -63,9 +64,9 @@ namespace TicTacToe
 
         public void InitSubBoards()
         {
-            for (int i = 0; i < _summaryBoard.Dimensions; i++)
+            for (int i = 0; i < _summaryBoard.dimensions; i++)
             {
-                for (int j = 0; j < _summaryBoard.Dimensions; j++)
+                for (int j = 0; j < _summaryBoard.dimensions; j++)
                 {
                     _subBoards[i, j] = new SubBoard(i, j);
                 }

@@ -3,19 +3,19 @@ namespace TicTacToe
 {
     public class HumanVsHuman : GameType
     {
-        private readonly HumanPlayer HumanPlayer1;
-        private readonly HumanPlayer HumanPlayer2;
+        private HumanPlayer _humanPlayer1;
+        private HumanPlayer _humanPlayer2;
 
         public HumanVsHuman(string player1Name, string player2Name)
         {
-            HumanPlayer1 = new HumanPlayer(PlayerMarker.X, player1Name);
-            HumanPlayer2 = new HumanPlayer(PlayerMarker.O, player2Name);
-            CurrentPlayer = HumanPlayer2;
+            _humanPlayer1 = new HumanPlayer(PlayerMarker.X, player1Name);
+            _humanPlayer2 = new HumanPlayer(PlayerMarker.O, player2Name);
+            CurrentPlayer = _humanPlayer2;
         }
 
         protected override Player SwitchPlayer()
         {
-            return (CurrentPlayer.IdPlayer == HumanPlayer1.IdPlayer) ? HumanPlayer2 : HumanPlayer1;
+            return (CurrentPlayer.IdPlayer == _humanPlayer1.IdPlayer) ? _humanPlayer2 : _humanPlayer1;
         }
     }
 }

@@ -3,14 +3,17 @@ namespace TicTacToe
 {
     public class SummaryBoard : Board
     {
-        public SummaryBoard() : base()
-        {
-            Column = Dimensions;
-        }
-
         public void OnSubBoardWinnerUpdated(object source, PlayerMoveEventArgs args)
         {
-            UpdateBoard(args.PlayerMove);
+            UpdateBoard(args.BoardRow, args.BoardColumn, args.PlayerMarker);
+        }
+        public override void SetWinnerIfNeeded()
+        {
+            var winnerMarker = CheckIfGameOver();
+            if (winnerMarker != null)
+            {
+                Winner = winnerMarker;
+            }
         }
     }
 }

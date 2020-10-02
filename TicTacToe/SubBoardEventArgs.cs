@@ -2,7 +2,7 @@
 
 namespace TicTacToe
 {
-    public class GameEventArgs : EventArgs
+    public class SubBoardEventArgs : EventArgs
     {
         public SubBoard[,] SubBoards { get; set; }
     }

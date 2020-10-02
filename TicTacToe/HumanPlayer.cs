@@ -31,7 +31,7 @@ namespace TicTacToe
             do
             {
                 OnHumanPlaying(++numberOfAttempts);
-                var desiredMove = ValidFormatAndRange(Console.ReadLine(), game._summaryBoard.Dimensions);
+                var desiredMove = ValidFormatAndRange(Console.ReadLine(), game._summaryBoard.dimensions);
                 if (desiredMove.Item1 != int.MinValue || desiredMove.Item2 != int.MinValue)
                 {
                     boardRow = GetRow(desiredMove.Item1);
@@ -50,12 +50,12 @@ namespace TicTacToe
 
             int GetRow(int index)
             {
-                return index / game._summaryBoard.Dimensions;
+                return index / game._summaryBoard.dimensions;
             }
 
             int GetColumn(int index)
             {
-                return index % game._summaryBoard.Dimensions;
+                return index % game._summaryBoard.dimensions;
             }
         }
 

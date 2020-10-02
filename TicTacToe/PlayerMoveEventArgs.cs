@@ -3,6 +3,8 @@ namespace TicTacToe
 {
     public class PlayerMoveEventArgs
     {
-        public PlayerMove PlayerMove { get; set; }
+        public int BoardRow { get; set; }
+        public int BoardColumn { get; set; }
+        public PlayerMarker? PlayerMarker { get; set; }
     }
 }

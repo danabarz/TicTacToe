@@ -49,9 +49,9 @@ namespace TicTacToe
 
         private Tuple<int, int> GetEmptyCell(Board gameBoard)
         {
-            for (int i = 0; i < gameBoard.Dimensions; i++)
+            for (int i = 0; i < gameBoard.dimensions; i++)
             {
-                for (int j = 0; j < gameBoard.Dimensions; j++)
+                for (int j = 0; j < gameBoard.dimensions; j++)
                 {
                     if (gameBoard.GameBoard[i, j] == null)
                     {
@@ -75,9 +75,9 @@ namespace TicTacToe
                 int row = int.MinValue;
                 int col =int.MinValue;
 
-                for (int i = 0; i < gameBoard.Dimensions; i++)
+                for (int i = 0; i < gameBoard.dimensions; i++)
                 {
-                    for (int j = 0; j < gameBoard.Dimensions; j++)
+                    for (int j = 0; j < gameBoard.dimensions; j++)
                     {
                         if (gameBoard.GameBoard[i, j] == null)
                         {

@@ -5,7 +5,7 @@ namespace TicTacToe
     {
         static void Main(string[] args)
         {
-            GameView gameView = new GameView();
+            var gameView = new GameView();
             gameView.RunGame();
         }
     }
