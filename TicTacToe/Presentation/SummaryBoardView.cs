@@ -6,10 +6,12 @@ namespace TicTacToe.Presentation
     public class SummaryBoardView : BoardView
     {
         private SummaryBoard _summaryBoard;
-        public SummaryBoardView(Board board) : base(board)
+        public SummaryBoardView(MainBoard board, Point topLeft) : base(board)
         {
             _summaryBoard = (SummaryBoard)board;
-            _originLocation = new Point(_summaryBoard.dimensions * _summaryBoard.dimensions * spaceBetweenPieces + spaceBetweenPieces, _summaryBoard.dimensions * spaceBetweenPieces);
+            _originLocation = new Point(Game.BoardDimensions * Game.BoardDimensions * SpaceBetweenPieces + SpaceBetweenPieces, Game.BoardDimensions * SpaceBetweenPieces);
+
+            // TODO: Register for events from main board about winners/ties
         }
     }
 }

@@ -4,6 +4,13 @@ namespace TicTacToe.Logic
 {
     public class PlayerEventArgs : EventArgs
     {
-        public Player Player { get; set; }
+        public PlayerEventArgs(Player player, int attemptsCount)
+        {
+            Player = player;
+            AttemptsCount = attemptsCount;
+        }
+
+        public Player Player { get; }
+        public int AttemptsCount { get; }
     }
 }

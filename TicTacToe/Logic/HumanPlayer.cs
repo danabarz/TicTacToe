@@ -31,12 +31,12 @@ namespace TicTacToe.Logic
             do
             {
                 OnHumanPlaying(++numberOfAttempts);
-                var desiredMove = ValidFormatAndRange(Console.ReadLine(), game._summaryBoard.dimensions);
+                var desiredMove = ValidFormatAndRange(Console.ReadLine(), Game.Game.BoardDimensions);
                 if (desiredMove.Item1 != int.MinValue || desiredMove.Item2 != int.MinValue)
                 {
                     boardRow = GetRow(desiredMove.Item1);
                     boardColumn = GetColumn(desiredMove.Item1);
-                    SubBoardOpenMoves = game._subBoards[boardRow, boardColumn].FindOpenMoves();
+                    SubBoardOpenMoves = game.MainBoard[boardRow, boardColumn].FindOpenMoves();
 
                     cellRow =  GetRow(desiredMove.Item2);
                     cellColumn = GetColumn(desiredMove.Item2);
@@ -46,16 +46,16 @@ namespace TicTacToe.Logic
             }
             while (!SubBoardOpenMoves.Contains(desiredCell));
 
-            return new PlayerMove(game._subBoards[boardRow, boardColumn], cellRow, cellColumn, IdPlayer);
+            return new PlayerMove(game.MainBoard[boardRow, boardColumn], cellRow, cellColumn, IdPlayer);
 
             int GetRow(int index)
             {
-                return index / game._summaryBoard.dimensions;
+                return index / Game.BoardDimensions;
             }
 
             int GetColumn(int index)
             {
-                return index % game._summaryBoard.dimensions;
+                return index % Game.BoardDimensions;
             }
         }
 

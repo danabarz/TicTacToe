@@ -3,7 +3,7 @@ using TicTacToe.Logic;
 
 namespace TicTacToe.Logic
 {
-    public class MiniMax
+    public class MinMax
     {
         readonly EvaluationFunction evaluateFunction = new EvaluationFunction();
 
@@ -50,9 +50,9 @@ namespace TicTacToe.Logic
 
         private Tuple<int, int> GetEmptyCell(Board gameBoard)
         {
-            for (int i = 0; i < gameBoard.dimensions; i++)
+            for (int i = 0; i < Game.BoardDimensions; i++)
             {
-                for (int j = 0; j < gameBoard.dimensions; j++)
+                for (int j = 0; j < Game.BoardDimensions; j++)
                 {
                     if (gameBoard.GameBoard[i, j] == null)
                     {
@@ -66,8 +66,8 @@ namespace TicTacToe.Logic
         public PlayerMove FindBestMove(Game game, PlayerMarker playerMarker)
         {
             var (boardRow, boardColumn) = UpdateBoardForMinMaxCheck(game._summaryBoard);
-            var (cellRow, cellColumn) = UpdateBoardForMinMaxCheck(game._subBoards[boardRow, boardColumn]);
-            return new PlayerMove(game._subBoards[boardRow, boardColumn], cellRow, cellColumn, playerMarker);
+            var (cellRow, cellColumn) = UpdateBoardForMinMaxCheck(game.MainBoard[boardRow, boardColumn]);
+            return new PlayerMove(game.MainBoard[boardRow, boardColumn], cellRow, cellColumn, playerMarker);
 
 
             Tuple<int, int> UpdateBoardForMinMaxCheck(Board gameBoard)
@@ -76,9 +76,9 @@ namespace TicTacToe.Logic
                 int row = int.MinValue;
                 int col =int.MinValue;
 
-                for (int i = 0; i < gameBoard.dimensions; i++)
+                for (int i = 0; i < Game.BoardDimensions; i++)
                 {
-                    for (int j = 0; j < gameBoard.dimensions; j++)
+                    for (int j = 0; j < Game.BoardDimensions; j++)
                     {
                         if (gameBoard.GameBoard[i, j] == null)
                         {

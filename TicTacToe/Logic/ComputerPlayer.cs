@@ -11,7 +11,7 @@ namespace TicTacToe.Logic
 
         public override PlayerMove ChooseMove(Game game)
         {
-            var miniMax = new MiniMax();
+            var miniMax = new MinMax();
             return miniMax.FindBestMove(game, IdPlayer);
         }
     }

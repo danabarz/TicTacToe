@@ -3,17 +3,33 @@ using System;
 
 namespace TicTacToe.Logic
 {
-    public class SubBoard : Board
+    public class SubBoard : Board<AtomicCell>, IBoardCell
     {
-        public SubBoard(int row, int col) : base()
+        public SubBoard(int row, int col) : base((cellRow, cellCol) => new AtomicCell(cellRow, cellCol))
         {
-            BoardRow = row;
-            BoardColumn = col;
+            Row = row;
+            Column = col;
         }
-        public int BoardRow { get; protected set; }
-        public int BoardColumn { get; protected set; }
+
+        public int Row { get; }
+        public int Column { get; }
 
         public event EventHandler<PlayerMoveEventArgs> UpdatedSubBoardWinner;
+
+        public void UpdateBoard(int cellRow, int cellColumn, PlayerMarker playerMarker)
+        {
+            if (GameBoard[cellRow, cellColumn].SetOwningPlayerIfAvailable(playerMarker))
+            {
+                OnBoardUpdated();
+
+                var winnerMarker = CheckIfGameOver();
+                if (winnerMarker != null)
+                {
+                    Winner = winnerMarker;
+                    OnSubBoardWinnerUpdated(Row, Column, Winner);
+                }
+            }
+        }
 
         private void OnSubBoardWinnerUpdated(int boardRow, int boardColumn, PlayerMarker? winnerMarker)
         {
@@ -22,12 +38,9 @@ namespace TicTacToe.Logic
 
         public override void SetWinnerIfNeeded()
         {
-            var winnerMarker = CheckIfGameOver();
-            if (winnerMarker != null)
-            {
-                Winner = winnerMarker;
-                OnSubBoardWinnerUpdated(BoardRow, BoardColumn, Winner);
-            }
+            
         }
+
+        PlayerMarker? IBoardCell.OwningPlayer => Winner;
     }
 }

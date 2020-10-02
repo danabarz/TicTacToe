@@ -3,17 +3,19 @@ namespace TicTacToe.Logic
 {
     public class PlayerMove
     {
-        public SubBoard _subBoard;
-        public int _row;
-        public int _column;
-        public PlayerMarker? _marker;
-
-        public PlayerMove(SubBoard subBoard, int row, int column, PlayerMarker? marker)
+        public PlayerMove(int subBoardRow, int subBoardCol, int atomicCellRow, int atomicCellCol, PlayerMarker playerMarker)
         {
-            _subBoard = subBoard;
-            _row = row;
-            _column = column;
-            _marker = marker;
+            SubBoardRow = subBoardRow;
+            SubBoardCol = subBoardCol;
+            AtomicCellRow = atomicCellRow;
+            AtomicCellCol = atomicCellCol;
+            PlayerMarker = playerMarker;
         }
+
+        public int SubBoardRow { get; }
+        public int SubBoardCol { get; }
+        public int AtomicCellRow { get; }
+        public int AtomicCellCol { get; }
+        public PlayerMarker PlayerMarker { get; }
     }
 }

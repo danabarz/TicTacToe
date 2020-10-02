@@ -1,57 +1,88 @@
 ﻿using System;
+using System.Drawing;
+using System.Linq;
 using TicTacToe.Logic;
 
 namespace TicTacToe.Presentation
 {
     public class GameView
     {
+        private enum GameType
+        {
+            HumanVsHuman = 1,
+            HumanVsComputer
+        }
+
         private const int TextOriginTop = 38;
         private const int PrintBoardStartLocation = 2;
-        private Game _game;
-        private SummaryBoardView _summaryBoardView;
-        private SubBoardView[,] _subBoardsView;
 
-        public GameView()
-        {
-            _game = new Game();
-            _summaryBoardView = new SummaryBoardView(_game._summaryBoard);
-            _subBoardsView = new SubBoardView[_game._summaryBoard.dimensions, _game._summaryBoard.dimensions];
-        }
+        private Game _game;
+        private MainBoardView _mainBoardView;
+        private SummaryBoardView _summaryBoardView;
+        private PlayerMove _humanPlayerMove;
 
         public void RunGame()
         {
-            bool isGameStillOn = true;
-            _game.AskingGameType += OnSelectingGameType;
-            _game.AskingPlayersName += OnHumanVsHumanTypeSelected;
-            _game.InitializedSubBoardsView += OnSubBoardsInitialized;
-            _game._summaryBoard.UpdatedBoardPieces += OnBoardUpdated;
             PrintHomePage();
-            _game.InitGameType();
             Console.Clear();
-            _game._gameType.MangedPlayerTurns += OnPlayerPlayed;
-            _game.InitSubBoards();
 
-            while (isGameStillOn)
+            _game = InitGame();
+            _mainBoardView = new MainBoardView(_game.MainBoard, new Point(0, 0));
+            var middleSubBoardRow = Game.BoardDimensions / 2;
+            _summaryBoardView = new SummaryBoardView(_game.MainBoard, _mainBoardView[middleSubBoardRow, Game.BoardDimensions - 1].BoundingBox.TopRight + new Size(BoardView.SpaceBetweenPieces, 0));
+
+            _game.HumanPlayerMoveRequested += OnHumanPlayerMoveRequested;
+            _game.Start();
+
+            while (_game.Winner == null)
             {
-                _game._gameType.TurnManager();
-                _game._gameType.CurrentPlayer.PrintingHumanOutput += OnHumanPlaying;
-                _game._gameType.CurrentPlayer.ClearedSpecificLine += OnLocationEntered;
-                var playerMove = _game._gameType.CurrentPlayer.ChooseMove(_game);
-                playerMove._subBoard.UpdatedBoardPieces += OnBoardUpdated;
-                playerMove._subBoard.UpdatedSubBoardWinner += _game._summaryBoard.OnSubBoardWinnerUpdated;
-                playerMove._subBoard.UpdateBoard(playerMove._row, playerMove._column, playerMove._marker);
-                playerMove._subBoard.SetWinnerIfNeeded();
-                _game._summaryBoard.SetWinnerIfNeeded();
-                isGameStillOn = (_game._summaryBoard.Winner != null) ? false : true;
+                _game.AcceptHumanPlayerMoveAndProceed(_humanPlayerMove);
+
+                //_game._gameType.TurnManager();
+                //_game._gameType.CurrentPlayer.PrintingHumanOutput += OnHumanPlaying;
+                //_game._gameType.CurrentPlayer.ClearedSpecificLine += OnLocationEntered;
+                //var playerMove = _game._gameType.CurrentPlayer.ChooseMove(_game);
+                //playerMove._subBoard.UpdatedBoardPieces += OnBoardUpdated;
+                //playerMove._subBoard.UpdatedSubBoardWinner += _game._summaryBoard.OnSubBoardWinnerUpdated;
+                //playerMove._subBoard.UpdateBoard(playerMove._row, playerMove._column, playerMove._marker);
+                //playerMove._subBoard.SetWinnerIfNeeded();
             }
-            PrintResult(_game._summaryBoard.Winner);
+            PrintResult(_game.Winner);
+        }
+
+        private Game InitGame()
+        {
+            bool isValidInput;
+            int gameTypeOption;
+            var allGameTypeOptions = GetEnumValuesAsIntegers<GameType>();
+            do
+            {
+                Console.WriteLine($"\nPlease select game type: \nFor Human Vs Human game please press {(int)GameType.HumanVsHuman}\nFor Human Vs Computer game please press {(int)GameType.HumanVsComputer}");
+                string gameTypeString = Console.ReadLine();
+                isValidInput = int.TryParse(gameTypeString, out gameTypeOption);
+            }
+            while (!isValidInput || !allGameTypeOptions.Contains(gameTypeOption));
+
+            if (gameTypeOption == (int)GameType.HumanVsComputer)
+            {
+                return Game.CreateHumanVsComputer();
+            }
+
+            Console.WriteLine("\nPlayer 1 - Please enter your name: ");
+            string player1 = Console.ReadLine();
+            Console.WriteLine("\nPlayer 2 - Please enter your name: ");
+            string player2 = Console.ReadLine();
+            return Game.CreateHumanVsHuman(player1, player2);
+
+            int[] GetEnumValuesAsIntegers<TEnum>() where TEnum : Enum
+                => Enum.GetValues(typeof(TEnum)).Cast<int>().ToArray();
         }
 
         private void OnSubBoardsInitialized(object source, SubBoardEventArgs args)
         {
-            for (int i = 0; i < _game._summaryBoard.dimensions; i++)
+            for (int i = 0; i < Game.BoardDimensions; i++)
             {
-                for (int j = 0; j < _game._summaryBoard.dimensions; j++)
+                for (int j = 0; j < Game.BoardDimensions; j++)
                 {
                     _subBoardsView[i, j] = new SubBoardView(args.SubBoards[i, j]);
                     PrintBoards(_subBoardsView[i, j]);
@@ -62,14 +93,21 @@ namespace TicTacToe.Presentation
 
         private void OnBoardUpdated(object source, EventArgs args)
         {
-            for (int i = 0; i < _game._summaryBoard.dimensions; i++)
+            for (int i = 0; i < Game.BoardDimensions; i++)
             {
-                for (int j = 0; j < _game._summaryBoard.dimensions; j++)
+                for (int j = 0; j < Game.BoardDimensions; j++)
                 {
                     PrintMarkers(_subBoardsView[i, j]);
                 }
             }
             PrintMarkers(_summaryBoardView);
+        }
+
+        private void OnHumanPlayerMoveRequested(object? sender, PlayerEventArgs e)
+        {
+            throw new NotImplementedException();
+
+            _humanPlayerMove = null; // TODO: set human player move
         }
 
         private void OnPlayerPlayed(object source, PlayerEventArgs args)
@@ -99,27 +137,17 @@ namespace TicTacToe.Presentation
             ClearCurrentConsoleLine(Console.CursorLeft, TextOriginTop + 1);
         }
 
-        private void OnSelectingGameType(object source, EventArgs args)
-        {
-            Console.WriteLine("\nPlease select game type: \nFor Human Vs Human game please press 1\nFor Human Vs Computer game please press 2");
-        }
-
-        private void OnHumanVsHumanTypeSelected(object source, IntEventArgs args)
-        {
-            Console.WriteLine("\nPlayer {0} - Please enter your name: ", args.Count);
-        }
-
         private void PrintBoards(BoardView boardView)
         {
             Console.SetCursorPosition(boardView._originLocation.X, boardView._originLocation.Y);
 
-            for (int i = boardView._originLocation.X; i <= boardView._originLocation.X + boardView.spaceBetweenPieces * _game._summaryBoard.dimensions; i += boardView.spaceBetweenPieces)
+            for (int i = boardView._originLocation.X; i <= boardView._originLocation.X + boardView.SpaceBetweenPieces * Game.BoardDimensions; i += boardView.SpaceBetweenPieces)
             {
-                for (int j = boardView._originLocation.Y; j <= boardView._originLocation.Y + boardView.spaceBetweenPieces * _game._summaryBoard.dimensions; j++)
+                for (int j = boardView._originLocation.Y; j <= boardView._originLocation.Y + boardView.SpaceBetweenPieces * Game.BoardDimensions; j++)
                 {
-                    if (i <= _game._summaryBoard.dimensions * boardView.spaceBetweenPieces * _game._summaryBoard.dimensions && i % (_game._summaryBoard.dimensions *
-                        boardView.spaceBetweenPieces) == 0 || i <= _game._summaryBoard.dimensions * boardView.spaceBetweenPieces * _game._summaryBoard.dimensions &&
-                        j % (_game._summaryBoard.dimensions * boardView.spaceBetweenPieces) == 0)
+                    if (i <= Game.BoardDimensions * boardView.SpaceBetweenPieces * Game.BoardDimensions && i % (Game.BoardDimensions *
+                        boardView.SpaceBetweenPieces) == 0 || i <= Game.BoardDimensions * boardView.SpaceBetweenPieces * Game.BoardDimensions &&
+                        j % (Game.BoardDimensions * boardView.SpaceBetweenPieces) == 0)
                     {
                         SetBaseColor();
                     }
@@ -131,13 +159,13 @@ namespace TicTacToe.Presentation
                     Console.Write("#");
                 }
             }
-            for (int j = boardView._originLocation.Y; j <= boardView._originLocation.Y + boardView.spaceBetweenPieces * _game._summaryBoard.dimensions; j += boardView.spaceBetweenPieces)
+            for (int j = boardView._originLocation.Y; j <= boardView._originLocation.Y + boardView.SpaceBetweenPieces * Game.BoardDimensions; j += boardView.SpaceBetweenPieces)
             {
-                for (int i = boardView._originLocation.X; i <= boardView._originLocation.X + boardView.spaceBetweenPieces * _game._summaryBoard.dimensions; i++)
+                for (int i = boardView._originLocation.X; i <= boardView._originLocation.X + boardView.SpaceBetweenPieces * Game.BoardDimensions; i++)
                 {
-                    if (i <= _game._summaryBoard.dimensions * boardView.spaceBetweenPieces * _game._summaryBoard.dimensions && i % (_game._summaryBoard.dimensions *
-                        boardView.spaceBetweenPieces) == 0 || i <= _game._summaryBoard.dimensions * boardView.spaceBetweenPieces * _game._summaryBoard.dimensions &&
-                        j % (_game._summaryBoard.dimensions * boardView.spaceBetweenPieces) == 0)
+                    if (i <= Game.BoardDimensions * boardView.SpaceBetweenPieces * Game.BoardDimensions && i % (Game.BoardDimensions *
+                        boardView.SpaceBetweenPieces) == 0 || i <= Game.BoardDimensions * boardView.SpaceBetweenPieces * Game.BoardDimensions &&
+                        j % (Game.BoardDimensions * boardView.SpaceBetweenPieces) == 0)
                     {
                         SetBaseColor();
                     }
@@ -153,12 +181,12 @@ namespace TicTacToe.Presentation
 
         private void PrintMarkers(BoardView boardView)
         {
-            for (int row = 0; row < _game._summaryBoard.dimensions; row++)
+            for (int row = 0; row < Game.BoardDimensions; row++)
             {
-                for (int col = 0; col < _game._summaryBoard.dimensions; col++)
+                for (int col = 0; col < Game.BoardDimensions; col++)
                 {
                     Console.ForegroundColor = ConsoleColor.Yellow;
-                    Console.SetCursorPosition(boardView._originLocation.X + PrintBoardStartLocation + col * boardView.spaceBetweenPieces, boardView._originLocation.Y + PrintBoardStartLocation + row * boardView.spaceBetweenPieces);
+                    Console.SetCursorPosition(boardView._originLocation.X + PrintBoardStartLocation + col * boardView.SpaceBetweenPieces, boardView._originLocation.Y + PrintBoardStartLocation + row * boardView.SpaceBetweenPieces);
                     if (boardView._board.GameBoard[row, col] == PlayerMarker.Tie)
                     {
                         Console.Write("-");

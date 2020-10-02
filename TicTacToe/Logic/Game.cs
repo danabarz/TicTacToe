@@ -2,76 +2,65 @@
 
 namespace TicTacToe.Logic
 {
-    public class Game
+    public sealed class Game // Sealed because we want to keep a private constructor
     {
-        private const int IndexGameTypeOne = 1;
-        private const int IndexGameTypeTwo = 2;
+        public const int BoardDimensions = 3;
 
-        public SummaryBoard _summaryBoard;
-        public SubBoard[,] _subBoards;
-        public GameType _gameType;
+        public static Game CreateHumanVsHuman(string player1Name, string player2Name)
+            => new Game(new HumanPlayer(PlayerMarker.X, player1Name), new HumanPlayer(PlayerMarker.O, player2Name));
 
-        public Game()
+        public static Game CreateHumanVsComputer()
+            => new Game(new HumanPlayer(), new ComputerPlayer());
+
+        private readonly Player[] _players;
+        private int _currentPlayerIndex;
+
+        private Game(params Player[] players)
         {
-            _summaryBoard = new SummaryBoard();
-            _subBoards = new SubBoard[_summaryBoard.dimensions, _summaryBoard.dimensions];
+            MainBoard = new MainBoard();
+            _players = players;
+            _currentPlayerIndex = 0;
         }
 
-        public event EventHandler<SubBoardEventArgs> InitializedSubBoardsView;
-        public event EventHandler<EventArgs> AskingGameType;
-        public event EventHandler<IntEventArgs> AskingPlayersName;
+        public MainBoard MainBoard { get; }
 
-        private void OnSubBoardsInitialized(SubBoard[,] SubBoards)
+        public event EventHandler<PlayerEventArgs>? HumanPlayerMoveRequested;
+
+        public void Start()
         {
-            InitializedSubBoardsView?.Invoke(this, new SubBoardEventArgs { SubBoards = SubBoards });
+            RunUntilHumanPlayerMoveRequested();
         }
 
-        private void OnSelectingGameType()
-        {
-            AskingGameType?.Invoke(this, EventArgs.Empty);
-        }
+        public PlayerMarker? Winner => MainBoard.Winner;
 
-        private void OnHumanVsHumanTypeSelected(int number)
+        public void AcceptHumanPlayerMoveAndProceed(PlayerMove move)
         {
-            AskingPlayersName?.Invoke(this, new IntEventArgs { Count = number });
-        }
-
-        public void InitGameType()
-        {
-            bool isValidInput;
-            int gameTypeIndex;
-            do
+            // Validate input - what if cell already taken? Need to re-ask for input by re-invoking the HumanPlayerMoveRequested event
+            if (CurrentPlayer.IdPlayer == move.PlayerMarker)
             {
-                OnSelectingGameType();
-                string gameTypeString = Console.ReadLine();
-                isValidInput = int.TryParse(gameTypeString, out gameTypeIndex);
+                AcceptMove(move);
             }
-            while (!isValidInput || gameTypeIndex > IndexGameTypeTwo || gameTypeIndex < IndexGameTypeOne);
 
-            if (gameTypeIndex == IndexGameTypeOne)
-            {
-                OnHumanVsHumanTypeSelected(IndexGameTypeOne);
-                string player1 = Console.ReadLine();
-                OnHumanVsHumanTypeSelected(IndexGameTypeTwo);
-                string player2 = Console.ReadLine();
-                _gameType = new HumanVsHuman(player1, player2);
-            }
-            else
-            {
-                _gameType = new HumanVsComputer();
-            }
+            RunUntilHumanPlayerMoveRequested();
         }
 
-        public void InitSubBoards()
+        private void RunUntilHumanPlayerMoveRequested()
         {
-            for (int i = 0; i < _summaryBoard.dimensions; i++)
+            while (CurrentPlayer is ComputerPlayer)
             {
-                for (int j = 0; j < _summaryBoard.dimensions; j++)
-                {
-                    _subBoards[i, j] = new SubBoard(i, j);
-                }
+                var move = CurrentPlayer.ChooseMove(this);
+                AcceptMove(move);
             }
-            OnSubBoardsInitialized(_subBoards);
+
+            HumanPlayerMoveRequested?.Invoke(this, new PlayerEventArgs(CurrentPlayer, 0));
         }
+
+        private void AcceptMove(PlayerMove move)
+        {
+            MainBoard[move.SubBoardRow, move.SubBoardCol].UpdateBoard(move.AtomicCellRow, move.AtomicCellCol, move.PlayerMarker);
+            _currentPlayerIndex = (_currentPlayerIndex + 1) % _players.Length;
+        }
+
+        private Player CurrentPlayer => _players[_currentPlayerIndex];
     }
 }
