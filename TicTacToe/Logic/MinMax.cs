@@ -7,7 +7,7 @@ namespace TicTacToe.Logic
     {
         readonly EvaluationFunction evaluateFunction = new EvaluationFunction();
 
-        private int Minimax(Board gameBoard, int depth, Boolean isMax, PlayerMarker playerMarker)
+        private int Minmax(Board gameBoard, int depth, bool isMax, PlayerMarker playerMarker)
         {
             int value = evaluateFunction.Evaluate(gameBoard, playerMarker);
 
@@ -37,11 +37,11 @@ namespace TicTacToe.Logic
                 gameBoard.GameBoard[row, col] = playerMarker;
                 if (defultValue == int.MinValue)
                 {
-                    bestValue = Math.Max(bestValue, Minimax(gameBoard, depth + 1, !isMax, gameBoard.GetOponenentPiece(playerMarker)));
+                    bestValue = Math.Max(bestValue, Minmax(gameBoard, depth + 1, !isMax, gameBoard.GetOponenentPiece(playerMarker)));
                 }
                 else
                 {
-                    bestValue = Math.Min(bestValue, Minimax(gameBoard, depth + 1, !isMax, gameBoard.GetOponenentPiece(playerMarker)));
+                    bestValue = Math.Min(bestValue, Minmax(gameBoard, depth + 1, !isMax, gameBoard.GetOponenentPiece(playerMarker)));
                 }
                 gameBoard.GameBoard[row, col] = null;
                 return bestValue;
@@ -83,7 +83,7 @@ namespace TicTacToe.Logic
                         if (gameBoard.GameBoard[i, j] == null)
                         {
                             gameBoard.GameBoard[i, j] = playerMarker;
-                            int moveValue = Minimax(gameBoard, 0, false, gameBoard.GetOponenentPiece(playerMarker));
+                            int moveValue = Minmax(gameBoard, 0, false, gameBoard.GetOponenentPiece(playerMarker));
                             gameBoard.GameBoard[i, j] = null;
                             if (moveValue > bestValue)
                             {
