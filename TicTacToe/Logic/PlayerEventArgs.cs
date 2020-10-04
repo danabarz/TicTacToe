@@ -9,6 +9,10 @@ namespace TicTacToe.Logic
             Player = player;
             AttemptsCount = attemptsCount;
         }
+        public PlayerEventArgs(Player player)
+        {
+            Player = player;
+        }
 
         public Player Player { get; }
         public int AttemptsCount { get; }

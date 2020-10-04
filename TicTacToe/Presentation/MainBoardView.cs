@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Drawing;
-using System.Text;
-using System.Xml;
 using TicTacToe.Logic;
 
 namespace TicTacToe.Presentation
 {
-    public class MainBoardView
+    public class MainBoardView : BoardView
     {
         private readonly MainBoard _mainBoard;
         private readonly SubBoardView[,] _subBoardsView;
@@ -34,6 +31,15 @@ namespace TicTacToe.Presentation
 
         public SubBoardView this[int row, int col] => _subBoardsView[row, col];
 
-        public BoundingBox BoundingBox { get; }
+        public override void PrintMarkers()
+        {
+            for (int i = 0; i < Game.BoardDimensions; i++)
+            {
+                for (int j = 0; j < Game.BoardDimensions; j++)
+                {
+                    _subBoardsView[i, j].PrintMarkers();
+                }
+            }
+        }
     }
 }

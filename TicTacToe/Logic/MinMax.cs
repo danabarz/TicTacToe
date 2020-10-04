@@ -1,15 +1,15 @@
 ﻿using System;
-using TicTacToe.Logic;
 
 namespace TicTacToe.Logic
 {
     public class MinMax
     {
-        readonly EvaluationFunction evaluateFunction = new EvaluationFunction();
+        private readonly EvaluationFunction evaluateFunction = new EvaluationFunction();
 
-        private int Minmax(Board gameBoard, int depth, bool isMax, PlayerMarker playerMarker)
+        private int Minmax(Board<AtomicCell> gameBoard, int depth, bool isMax, PlayerMarker playerMarker)
         {
             int value = evaluateFunction.Evaluate(gameBoard, playerMarker);
+            int emptyLocationIndex = 0;
 
             if (value == int.MaxValue)
             {
@@ -33,8 +33,8 @@ namespace TicTacToe.Logic
             int AddMarkerAndCheckBoardValue(int defultValue)
             {
                 int bestValue = defultValue;
-                var (row, col) = GetEmptyCell(gameBoard);
-                gameBoard.GameBoard[row, col] = playerMarker;
+                var openLocations = gameBoard.FindOpenMoves();
+                gameBoard[openLocations[emptyLocationIndex].Item1, openLocations[emptyLocationIndex].Item2].SetOwningPlayerIfAvailable(playerMarker);
                 if (defultValue == int.MinValue)
                 {
                     bestValue = Math.Max(bestValue, Minmax(gameBoard, depth + 1, !isMax, gameBoard.GetOponenentPiece(playerMarker)));
@@ -43,59 +43,50 @@ namespace TicTacToe.Logic
                 {
                     bestValue = Math.Min(bestValue, Minmax(gameBoard, depth + 1, !isMax, gameBoard.GetOponenentPiece(playerMarker)));
                 }
-                gameBoard.GameBoard[row, col] = null;
+                gameBoard[openLocations[emptyLocationIndex].Item1, openLocations[emptyLocationIndex].Item2].SetOwningPlayerToNull();
+                emptyLocationIndex++;
                 return bestValue;
             }
         }
 
-        private Tuple<int, int> GetEmptyCell(Board gameBoard)
+
+        public PlayerMove FindBestMove(MainBoard mainBoard, PlayerMarker playerMarker)
         {
+            int bestValue = int.MinValue;
+            int boardRow = int.MinValue;
+            int boardColumn = int.MinValue;
+            int cellRow = int.MinValue;
+            int cellColumn = int.MinValue;
+            int emptyLocationIndex = 0;
+
             for (int i = 0; i < Game.BoardDimensions; i++)
             {
                 for (int j = 0; j < Game.BoardDimensions; j++)
                 {
-                    if (gameBoard.GameBoard[i, j] == null)
+                    var openLocations = mainBoard[i, j].FindOpenMoves();
+                    if (emptyLocationIndex >= openLocations.Count || mainBoard[i, j].Winner != null)
                     {
-                        return Tuple.Create(i, j);
+                        continue;
                     }
-                }
-            }
-            return null;
-        }
-
-        public PlayerMove FindBestMove(Game game, PlayerMarker playerMarker)
-        {
-            var (boardRow, boardColumn) = UpdateBoardForMinMaxCheck(game._summaryBoard);
-            var (cellRow, cellColumn) = UpdateBoardForMinMaxCheck(game.MainBoard[boardRow, boardColumn]);
-            return new PlayerMove(game.MainBoard[boardRow, boardColumn], cellRow, cellColumn, playerMarker);
-
-
-            Tuple<int, int> UpdateBoardForMinMaxCheck(Board gameBoard)
-            {
-                int bestValue = int.MinValue;
-                int row = int.MinValue;
-                int col =int.MinValue;
-
-                for (int i = 0; i < Game.BoardDimensions; i++)
-                {
-                    for (int j = 0; j < Game.BoardDimensions; j++)
+                    if (mainBoard[i, j][openLocations[emptyLocationIndex].Item1, openLocations[emptyLocationIndex].Item2].SetOwningPlayerIfAvailable(playerMarker))
                     {
-                        if (gameBoard.GameBoard[i, j] == null)
+                        int moveValue = Minmax(mainBoard[i, j], 0, false, mainBoard[i, j].GetOponenentPiece(playerMarker));
+                        mainBoard[i, j][openLocations[emptyLocationIndex].Item1, openLocations[emptyLocationIndex].Item2].SetOwningPlayerToNull();
+                        if (moveValue >= bestValue)
                         {
-                            gameBoard.GameBoard[i, j] = playerMarker;
-                            int moveValue = Minmax(gameBoard, 0, false, gameBoard.GetOponenentPiece(playerMarker));
-                            gameBoard.GameBoard[i, j] = null;
-                            if (moveValue > bestValue)
-                            {
-                                row = i;
-                                col = j;
-                                bestValue = moveValue;
-                            }
+                            boardRow = i;
+                            boardColumn = j;
+                            cellRow = openLocations[emptyLocationIndex].Item1;
+                            cellColumn = openLocations[emptyLocationIndex].Item2;
+                            bestValue = moveValue;
                         }
                     }
                 }
-                return Tuple.Create(row, col);
+
+                emptyLocationIndex++;
             }
+
+            return new PlayerMove(boardRow, boardColumn, cellRow, cellColumn, playerMarker);
         }
     }
 }

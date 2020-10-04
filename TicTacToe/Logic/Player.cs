@@ -1,25 +1,14 @@
-﻿using System;
-
-namespace TicTacToe.Logic
+﻿namespace TicTacToe.Logic
 {
     public abstract class Player
     {
-        public event EventHandler<IntEventArgs> PrintingHumanOutput;
-        public event EventHandler<EventArgs> ClearedSpecificLine;
-
         public PlayerMarker IdPlayer { get; protected set; }
-        public string PlayerName { get; protected set; }
+        public string? PlayerName { get; protected set; }
 
-        protected void OnHumanPlaying(int numberOfAttempts)
+        public PlayerMove ChooseMove(MainBoard mainBoard)
         {
-            PrintingHumanOutput?.Invoke(this, new IntEventArgs { Count = numberOfAttempts });
+            var miniMax = new MinMax();
+            return miniMax.FindBestMove(mainBoard, IdPlayer);
         }
-
-        protected void OnLocationEntered()
-        {
-            ClearedSpecificLine?.Invoke(this, EventArgs.Empty);
-        }
-
-        public abstract PlayerMove ChooseMove(Game game);
     }
 }

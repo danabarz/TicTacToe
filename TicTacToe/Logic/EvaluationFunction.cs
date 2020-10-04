@@ -3,7 +3,7 @@ namespace TicTacToe.Logic
 {
     public class EvaluationFunction
     {
-        public int Evaluate(Board gameBoard, PlayerMarker playerMarker)
+        public int Evaluate(Board<AtomicCell> gameBoard, PlayerMarker playerMarker)
         {
             if (gameBoard.CheckIfGameOver() == gameBoard.GetOponenentPiece(playerMarker))
             {

@@ -1,18 +1,33 @@
-﻿using System.Drawing;
-using System;
+﻿using System;
+using System.Drawing;
 using TicTacToe.Logic;
 
 namespace TicTacToe.Presentation
 {
     public class SubBoardView : BoardView
     {
-        private SubBoard _subBoard;
-        public SubBoardView(SubBoard subBoard) : base(subBoard)
+        private readonly SubBoard _subBoard;
+        public SubBoardView(SubBoard subBoard, Point topLeft)
         {
             _subBoard = subBoard;
-            _originLocation = new Point(_subBoard.Column * Game.BoardDimensions * SpaceBetweenPieces, _subBoard.Row * Game.BoardDimensions * SpaceBetweenPieces);
+            BoundingBox = new BoundingBox(topLeft, height, width);
+            _subBoard.UpdatedBoardPieces += OnUpdatedBoardPieces;
         }
 
-        public BoundingBox BoundingBox { get; }
+        public override void PrintMarkers()
+        {
+            for (int row = 0; row < Game.BoardDimensions; row++)
+            {
+                for (int col = 0; col < Game.BoardDimensions; col++)
+                {
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    Console.SetCursorPosition(BoundingBox.TopLeft.X + PrintBoardStartLocation + col * SpaceBetweenPieces, BoundingBox.TopLeft.Y + PrintBoardStartLocation + row * SpaceBetweenPieces);
+                    Console.Write(_subBoard[row, col].OwningPlayer);
+                }
+                Console.WriteLine();
+            }
+        }
+
+
     }
 }

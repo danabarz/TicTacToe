@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Drawing;
 using System.Linq;
+using System.Threading;
 using TicTacToe.Logic;
 
 namespace TicTacToe.Presentation
@@ -13,13 +14,11 @@ namespace TicTacToe.Presentation
             HumanVsComputer
         }
 
-        private const int TextOriginTop = 38;
-        private const int PrintBoardStartLocation = 2;
-
-        private Game _game;
-        private MainBoardView _mainBoardView;
-        private SummaryBoardView _summaryBoardView;
-        private PlayerMove _humanPlayerMove;
+        private Game? _game;
+        private MainBoardView? _mainBoardView;
+        private SummaryBoardView? _summaryBoardView;
+        private HumanPlayerView? _humanPlayerView;
+        private PlayerMove? _humanPlayerMove;
 
         public void RunGame()
         {
@@ -30,23 +29,19 @@ namespace TicTacToe.Presentation
             _mainBoardView = new MainBoardView(_game.MainBoard, new Point(0, 0));
             var middleSubBoardRow = Game.BoardDimensions / 2;
             _summaryBoardView = new SummaryBoardView(_game.MainBoard, _mainBoardView[middleSubBoardRow, Game.BoardDimensions - 1].BoundingBox.TopRight + new Size(BoardView.SpaceBetweenPieces, 0));
+            _humanPlayerView = new HumanPlayerView(_mainBoardView.BoundingBox.BottomLeft + new Size(0, Game.BoardDimensions));
+            _mainBoardView.PrintBoard();
+            _summaryBoardView.PrintBoard();
 
             _game.HumanPlayerMoveRequested += OnHumanPlayerMoveRequested;
+            _game.CurrentPlayerChanged += OnCurrentPlayerChanged;
             _game.Start();
 
             while (_game.Winner == null)
             {
                 _game.AcceptHumanPlayerMoveAndProceed(_humanPlayerMove);
-
-                //_game._gameType.TurnManager();
-                //_game._gameType.CurrentPlayer.PrintingHumanOutput += OnHumanPlaying;
-                //_game._gameType.CurrentPlayer.ClearedSpecificLine += OnLocationEntered;
-                //var playerMove = _game._gameType.CurrentPlayer.ChooseMove(_game);
-                //playerMove._subBoard.UpdatedBoardPieces += OnBoardUpdated;
-                //playerMove._subBoard.UpdatedSubBoardWinner += _game._summaryBoard.OnSubBoardWinnerUpdated;
-                //playerMove._subBoard.UpdateBoard(playerMove._row, playerMove._column, playerMove._marker);
-                //playerMove._subBoard.SetWinnerIfNeeded();
             }
+
             PrintResult(_game.Winner);
         }
 
@@ -59,6 +54,7 @@ namespace TicTacToe.Presentation
             {
                 Console.WriteLine($"\nPlease select game type: \nFor Human Vs Human game please press {(int)GameType.HumanVsHuman}\nFor Human Vs Computer game please press {(int)GameType.HumanVsComputer}");
                 string gameTypeString = Console.ReadLine();
+                Console.Clear();
                 isValidInput = int.TryParse(gameTypeString, out gameTypeOption);
             }
             while (!isValidInput || !allGameTypeOptions.Contains(gameTypeOption));
@@ -68,135 +64,35 @@ namespace TicTacToe.Presentation
                 return Game.CreateHumanVsComputer();
             }
 
+            Console.Clear();
             Console.WriteLine("\nPlayer 1 - Please enter your name: ");
             string player1 = Console.ReadLine();
             Console.WriteLine("\nPlayer 2 - Please enter your name: ");
             string player2 = Console.ReadLine();
+            Console.Clear();
             return Game.CreateHumanVsHuman(player1, player2);
 
             int[] GetEnumValuesAsIntegers<TEnum>() where TEnum : Enum
                 => Enum.GetValues(typeof(TEnum)).Cast<int>().ToArray();
         }
 
-        private void OnSubBoardsInitialized(object source, SubBoardEventArgs args)
+        private void OnHumanPlayerMoveRequested(object? sender, PlayerEventArgs args)
         {
-            for (int i = 0; i < Game.BoardDimensions; i++)
-            {
-                for (int j = 0; j < Game.BoardDimensions; j++)
-                {
-                    _subBoardsView[i, j] = new SubBoardView(args.SubBoards[i, j]);
-                    PrintBoards(_subBoardsView[i, j]);
-                }
-            }
-            PrintBoards(_summaryBoardView);
+            SetBaseColor();
+            var (boardNumber, cellNuber) = _humanPlayerView.AskForBoardAndCell(args.AttemptsCount);
+            _humanPlayerMove = new PlayerMove(_game.MainBoard.GetRow(boardNumber), _game.MainBoard.GetColumn(boardNumber), _game.MainBoard.GetRow(cellNuber), _game.MainBoard.GetColumn(cellNuber), args.Player.IdPlayer);
         }
 
-        private void OnBoardUpdated(object source, EventArgs args)
+        private void OnCurrentPlayerChanged(object? source, PlayerEventArgs args)
         {
-            for (int i = 0; i < Game.BoardDimensions; i++)
-            {
-                for (int j = 0; j < Game.BoardDimensions; j++)
-                {
-                    PrintMarkers(_subBoardsView[i, j]);
-                }
-            }
-            PrintMarkers(_summaryBoardView);
-        }
-
-        private void OnHumanPlayerMoveRequested(object? sender, PlayerEventArgs e)
-        {
-            throw new NotImplementedException();
-
-            _humanPlayerMove = null; // TODO: set human player move
-        }
-
-        private void OnPlayerPlayed(object source, PlayerEventArgs args)
-        {           
-            ClearCurrentConsoleLine(Console.CursorLeft, TextOriginTop);
+            _humanPlayerView.ClearHumanPlayerLines();
+            _humanPlayerView.ClearCurrentConsoleLine(0, _mainBoardView.BoundingBox.BottomLeft.Y + Game.BoardDimensions - 1);
             SetBaseTextPosition();
             SetBaseColor();
             Console.WriteLine(args.Player.PlayerName + " it's your turn");
-        }
-
-        private void OnHumanPlaying(object source, IntEventArgs args)
-        {
-            Console.SetCursorPosition(Console.CursorLeft, TextOriginTop + 1);
-            if (args.Count == 1)
+            if (args.Player.PlayerName.Equals("Computer"))
             {
-                Console.WriteLine("Please enter sub board and cell, for example- \"1 1\": ");
-            }
-            else
-            {
-                Console.WriteLine("Oops... Something went wrong, please try again: ");
-            }
-        }
-
-        private void OnLocationEntered(object source, EventArgs args)
-        {
-            ClearCurrentConsoleLine(Console.CursorLeft, Console.CursorTop - 1);
-            ClearCurrentConsoleLine(Console.CursorLeft, TextOriginTop + 1);
-        }
-
-        private void PrintBoards(BoardView boardView)
-        {
-            Console.SetCursorPosition(boardView._originLocation.X, boardView._originLocation.Y);
-
-            for (int i = boardView._originLocation.X; i <= boardView._originLocation.X + boardView.SpaceBetweenPieces * Game.BoardDimensions; i += boardView.SpaceBetweenPieces)
-            {
-                for (int j = boardView._originLocation.Y; j <= boardView._originLocation.Y + boardView.SpaceBetweenPieces * Game.BoardDimensions; j++)
-                {
-                    if (i <= Game.BoardDimensions * boardView.SpaceBetweenPieces * Game.BoardDimensions && i % (Game.BoardDimensions *
-                        boardView.SpaceBetweenPieces) == 0 || i <= Game.BoardDimensions * boardView.SpaceBetweenPieces * Game.BoardDimensions &&
-                        j % (Game.BoardDimensions * boardView.SpaceBetweenPieces) == 0)
-                    {
-                        SetBaseColor();
-                    }
-                    else
-                    {
-                        Console.ForegroundColor = ConsoleColor.DarkRed;
-                    }
-                    Console.SetCursorPosition(i, j);
-                    Console.Write("#");
-                }
-            }
-            for (int j = boardView._originLocation.Y; j <= boardView._originLocation.Y + boardView.SpaceBetweenPieces * Game.BoardDimensions; j += boardView.SpaceBetweenPieces)
-            {
-                for (int i = boardView._originLocation.X; i <= boardView._originLocation.X + boardView.SpaceBetweenPieces * Game.BoardDimensions; i++)
-                {
-                    if (i <= Game.BoardDimensions * boardView.SpaceBetweenPieces * Game.BoardDimensions && i % (Game.BoardDimensions *
-                        boardView.SpaceBetweenPieces) == 0 || i <= Game.BoardDimensions * boardView.SpaceBetweenPieces * Game.BoardDimensions &&
-                        j % (Game.BoardDimensions * boardView.SpaceBetweenPieces) == 0)
-                    {
-                        SetBaseColor();
-                    }
-                    else
-                    {
-                        Console.ForegroundColor = ConsoleColor.DarkRed;
-                    }
-                    Console.SetCursorPosition(i, j);
-                    Console.Write("#");
-                }
-            }
-        }
-
-        private void PrintMarkers(BoardView boardView)
-        {
-            for (int row = 0; row < Game.BoardDimensions; row++)
-            {
-                for (int col = 0; col < Game.BoardDimensions; col++)
-                {
-                    Console.ForegroundColor = ConsoleColor.Yellow;
-                    Console.SetCursorPosition(boardView._originLocation.X + PrintBoardStartLocation + col * boardView.SpaceBetweenPieces, boardView._originLocation.Y + PrintBoardStartLocation + row * boardView.SpaceBetweenPieces);
-                    if (boardView._board.GameBoard[row, col] == PlayerMarker.Tie)
-                    {
-                        Console.Write("-");
-                    }
-                    else
-                    {
-                        Console.Write(boardView._board.GameBoard[row, col]);
-                    }
-                }
-                Console.WriteLine();
+                Thread.Sleep(1000);
             }
         }
 
@@ -291,13 +187,7 @@ namespace TicTacToe.Presentation
 
         private void SetBaseTextPosition()
         {
-            Console.SetCursorPosition(0, TextOriginTop);
-        }
-
-        private void ClearCurrentConsoleLine(int originLeft, int originTop)
-        {
-            Console.SetCursorPosition(originLeft, originTop);
-            Console.WriteLine(new String(' ', Console.BufferWidth));
+            Console.SetCursorPosition(0, _mainBoardView.BoundingBox.BottomLeft.Y + Game.BoardDimensions - 1);
         }
     }
 }

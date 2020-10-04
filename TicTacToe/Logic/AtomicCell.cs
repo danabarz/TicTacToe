@@ -11,7 +11,6 @@
 
         public int Row { get; }
         public int Column { get; }
-
         public PlayerMarker? OwningPlayer { get; private set; }
 
         public bool SetOwningPlayerIfAvailable(PlayerMarker owningPlayer)
@@ -24,6 +23,11 @@
             }
 
             return wasAvailable;
+        }
+
+        public void SetOwningPlayerToNull()
+        {
+            OwningPlayer = null;
         }
     }
 }

@@ -5,15 +5,16 @@ namespace TicTacToe.Logic
     public sealed class Game // Sealed because we want to keep a private constructor
     {
         public const int BoardDimensions = 3;
+        private int attemptsCount = 0;
+
+        private readonly Player[] _players;
+        private int _currentPlayerIndex;
 
         public static Game CreateHumanVsHuman(string player1Name, string player2Name)
             => new Game(new HumanPlayer(PlayerMarker.X, player1Name), new HumanPlayer(PlayerMarker.O, player2Name));
 
         public static Game CreateHumanVsComputer()
             => new Game(new HumanPlayer(), new ComputerPlayer());
-
-        private readonly Player[] _players;
-        private int _currentPlayerIndex;
 
         private Game(params Player[] players)
         {
@@ -23,22 +24,26 @@ namespace TicTacToe.Logic
         }
 
         public MainBoard MainBoard { get; }
+        public PlayerMarker? Winner => MainBoard.Winner;
 
         public event EventHandler<PlayerEventArgs>? HumanPlayerMoveRequested;
+        public event EventHandler<PlayerEventArgs> CurrentPlayerChanged;
 
         public void Start()
         {
+            CurrentPlayerChanged?.Invoke(this, new PlayerEventArgs(CurrentPlayer));
             RunUntilHumanPlayerMoveRequested();
         }
 
-        public PlayerMarker? Winner => MainBoard.Winner;
-
         public void AcceptHumanPlayerMoveAndProceed(PlayerMove move)
         {
-            // Validate input - what if cell already taken? Need to re-ask for input by re-invoking the HumanPlayerMoveRequested event
             if (CurrentPlayer.IdPlayer == move.PlayerMarker)
             {
-                AcceptMove(move);
+                var emptyCells = MainBoard[move.SubBoardRow, move.SubBoardCol].FindOpenMoves();
+                if (emptyCells.Contains(Tuple.Create(move.AtomicCellRow, move.AtomicCellCol)))
+                {
+                    AcceptMove(move);
+                }
             }
 
             RunUntilHumanPlayerMoveRequested();
@@ -48,17 +53,23 @@ namespace TicTacToe.Logic
         {
             while (CurrentPlayer is ComputerPlayer)
             {
-                var move = CurrentPlayer.ChooseMove(this);
+                var move = CurrentPlayer.ChooseMove(MainBoard);
                 AcceptMove(move);
             }
 
-            HumanPlayerMoveRequested?.Invoke(this, new PlayerEventArgs(CurrentPlayer, 0));
+            HumanPlayerMoveRequested?.Invoke(this, new PlayerEventArgs(CurrentPlayer, attemptsCount++));
         }
 
         private void AcceptMove(PlayerMove move)
         {
-            MainBoard[move.SubBoardRow, move.SubBoardCol].UpdateBoard(move.AtomicCellRow, move.AtomicCellCol, move.PlayerMarker);
-            _currentPlayerIndex = (_currentPlayerIndex + 1) % _players.Length;
+            if (MainBoard[move.SubBoardRow, move.SubBoardCol][move.AtomicCellRow, move.AtomicCellCol].SetOwningPlayerIfAvailable(move.PlayerMarker))
+            {
+                MainBoard[move.SubBoardRow, move.SubBoardCol].SetWinner();
+                MainBoard.SetWinner();
+                _currentPlayerIndex = (_currentPlayerIndex + 1) % _players.Length;
+                attemptsCount = 0;
+                CurrentPlayerChanged?.Invoke(this, new PlayerEventArgs(CurrentPlayer));
+            }
         }
 
         private Player CurrentPlayer => _players[_currentPlayerIndex];
