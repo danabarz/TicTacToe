@@ -76,7 +76,7 @@ namespace TicTacToe.Presentation
                 => Enum.GetValues(typeof(TEnum)).Cast<int>().ToArray();
         }
 
-        private void OnHumanPlayerMoveRequested(object? sender, PlayerEventArgs args)
+        private void OnHumanPlayerMoveRequested(object? source, PlayerEventArgs args)
         {
             SetBaseColor();
             var (boardNumber, cellNuber) = _humanPlayerView.AskForBoardAndCell(args.AttemptsCount);

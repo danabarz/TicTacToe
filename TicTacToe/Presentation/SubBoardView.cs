@@ -27,7 +27,5 @@ namespace TicTacToe.Presentation
                 Console.WriteLine();
             }
         }
-
-
     }
 }

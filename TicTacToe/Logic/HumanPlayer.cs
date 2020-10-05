@@ -4,14 +4,14 @@
     {
         public HumanPlayer()
         {
-            IdPlayer = PlayerMarker.X;
-            PlayerName = "Human";
+            _idPlayer = PlayerMarker.X;
+            _playerName = "Human";
         }
 
         public HumanPlayer(PlayerMarker playerMarker, string playerName)
         {
-            IdPlayer = playerMarker;
-            PlayerName = playerName;
+            _idPlayer = playerMarker;
+            _playerName = playerName;
         }
     }
 }

@@ -25,7 +25,7 @@ namespace TicTacToe.Logic
         public event EventHandler<EventArgs>? UpdatedBoardPieces;
 
         protected TCell[,] GameBoard { get; }
-        public PlayerMarker? Winner { get; protected set; }
+        public PlayerMarker? Winner { get; private set; }
 
         public TCell this[int row, int col] => GameBoard[row, col];
 

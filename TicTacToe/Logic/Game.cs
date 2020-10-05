@@ -27,7 +27,7 @@ namespace TicTacToe.Logic
         public PlayerMarker? Winner => MainBoard.Winner;
 
         public event EventHandler<PlayerEventArgs>? HumanPlayerMoveRequested;
-        public event EventHandler<PlayerEventArgs> CurrentPlayerChanged;
+        public event EventHandler<PlayerEventArgs>? CurrentPlayerChanged;
 
         public void Start()
         {

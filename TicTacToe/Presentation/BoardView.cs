@@ -19,16 +19,7 @@ namespace TicTacToe.Presentation
             {
                 for (int j = BoundingBox.TopLeft.Y; j <= BoundingBox.BottomRight.Y; j++)
                 {
-                    if (i <= BoundingBox.BottomRight.X && (i % (BoundingBox.Width / Game.BoardDimensions) == 0 || j % (BoundingBox.Height / Game.BoardDimensions) == 0))
-                    {
-                        Console.ForegroundColor = ConsoleColor.Red;
-                    }
-                    else
-                    {
-                        Console.ForegroundColor = ConsoleColor.DarkRed;
-                    }
-                    Console.SetCursorPosition(i, j);
-                    Console.Write("#");
+                    CheckWhichColorAndPrint(i, j);
                 }
             }
             
@@ -36,17 +27,22 @@ namespace TicTacToe.Presentation
             {
                 for (int i = BoundingBox.TopLeft.X; i <= BoundingBox.BottomRight.X; i++)
                 {
-                    if (i <= BoundingBox.BottomRight.X && (i % (BoundingBox.Width / Game.BoardDimensions) == 0 ||  j % (BoundingBox.Height / Game.BoardDimensions) == 0))
-                    {
-                        Console.ForegroundColor = ConsoleColor.Red;
-                    }
-                    else
-                    {
-                        Console.ForegroundColor = ConsoleColor.DarkRed;
-                    }
-                    Console.SetCursorPosition(i, j);
-                    Console.Write("#");
+                    CheckWhichColorAndPrint(i, j);
                 }
+            }
+
+            void CheckWhichColorAndPrint(int i, int j)
+            {
+                if (i <= BoundingBox.BottomRight.X && (i % (BoundingBox.Width / Game.BoardDimensions) == 0 || j % (BoundingBox.Height / Game.BoardDimensions) == 0))
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                }
+                else
+                {
+                    Console.ForegroundColor = ConsoleColor.DarkRed;
+                }
+                Console.SetCursorPosition(i, j);
+                Console.Write("#");
             }
         }
 

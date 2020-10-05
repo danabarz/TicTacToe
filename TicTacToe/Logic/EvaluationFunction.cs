@@ -7,11 +7,11 @@ namespace TicTacToe.Logic
         {
             if (gameBoard.CheckIfGameOver() == gameBoard.GetOponenentPiece(playerMarker))
             {
-                return int.MaxValue;
+                return MinMax.maxValue;
             }
             else if (gameBoard.CheckIfGameOver() == playerMarker)
             {
-                return int.MinValue;
+                return MinMax.minValue;
             }
             return 0;
         }
