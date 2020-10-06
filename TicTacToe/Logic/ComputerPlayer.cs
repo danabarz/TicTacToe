@@ -7,5 +7,11 @@
             _idPlayer = PlayerMarker.O;
             _playerName = "Computer";
         }
+
+        public PlayerMove ChooseMove(MainBoard mainBoard)
+        {
+            var miniMax = new MinMax();
+            return miniMax.FindBestMove(mainBoard, _idPlayer);
+        }
     }
 }

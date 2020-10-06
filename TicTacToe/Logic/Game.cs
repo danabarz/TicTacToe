@@ -51,9 +51,9 @@ namespace TicTacToe.Logic
 
         private void RunUntilHumanPlayerMoveRequested()
         {
-            while (CurrentPlayer is ComputerPlayer)
+            while (CurrentPlayer is ComputerPlayer computerPlayer)
             {
-                var move = CurrentPlayer.ChooseMove(MainBoard);
+                var move = computerPlayer.ChooseMove(MainBoard);
                 AcceptMove(move);
             }
 

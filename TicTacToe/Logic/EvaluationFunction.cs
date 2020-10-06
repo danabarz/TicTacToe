@@ -1,5 +1,4 @@
-﻿
-namespace TicTacToe.Logic
+﻿namespace TicTacToe.Logic
 {
     public class EvaluationFunction
     {
