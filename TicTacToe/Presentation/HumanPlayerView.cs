@@ -18,14 +18,17 @@ namespace TicTacToe.Presentation
         {
             ClearHumanPlayerLines();
             Console.SetCursorPosition(_topLeft.X, _topLeft.Y);
+
             if (attemps == 0)
             {
                 Console.WriteLine("Please enter sub board and cell, for example- \"1 1\": ");
             }
+
             else
             {
                 Console.WriteLine("Oops... This cell already taken, Please choose another cell: ");
             }
+
             var desiredMove = CheckValidFormatAndRange(Console.ReadLine());
             return (AskForValidalidInput(desiredMove));
         }
@@ -57,6 +60,7 @@ namespace TicTacToe.Presentation
         private Tuple<int, int>? CheckValidFormatAndRange(string subBoardAndCellIndex)
         {
             string regexPattern = @"\d[,. ]\d";
+
             if (Regex.Match(subBoardAndCellIndex, regexPattern).Success)
             {
                 string[] userInput = Regex.Split(subBoardAndCellIndex, @"[,. ]");

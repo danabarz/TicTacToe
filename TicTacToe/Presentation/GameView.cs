@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Drawing;
 using System.Linq;
-using System.Threading;
 using TicTacToe.Logic;
 
 namespace TicTacToe.Presentation
@@ -50,6 +49,7 @@ namespace TicTacToe.Presentation
             bool isValidInput;
             int gameTypeOption;
             var allGameTypeOptions = GetEnumValuesAsIntegers<GameType>();
+
             do
             {
                 Console.WriteLine($"\nPlease select game type: \nFor Human Vs Human game please press {(int)GameType.HumanVsHuman}\nFor Human Vs Computer game please press {(int)GameType.HumanVsComputer}");
@@ -90,10 +90,6 @@ namespace TicTacToe.Presentation
             SetBaseTextPosition();
             SetBaseColor();
             Console.WriteLine(args.Player.PlayerName + " it's your turn");
-            if (args.Player.PlayerName.Equals("Computer"))
-            {
-                Thread.Sleep(1000);
-            }
         }
 
         private void PrintResult(PlayerMarker? playerMarker)
@@ -102,10 +98,12 @@ namespace TicTacToe.Presentation
             {
                 PrintXWon();
             }
+
             else if (playerMarker == PlayerMarker.O)
             {
                 PrintOWon();
             }
+
             else
             {
                 PrintTie();

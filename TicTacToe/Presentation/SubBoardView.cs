@@ -24,6 +24,7 @@ namespace TicTacToe.Presentation
                     Console.SetCursorPosition(BoundingBox.TopLeft.X + PrintBoardStartLocation + col * SpaceBetweenPieces, BoundingBox.TopLeft.Y + PrintBoardStartLocation + row * SpaceBetweenPieces);
                     Console.Write(_subBoard[row, col].OwningPlayer);
                 }
+
                 Console.WriteLine();
             }
         }

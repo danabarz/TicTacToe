@@ -40,6 +40,7 @@ namespace TicTacToe.Logic
             if (CurrentPlayer.IdPlayer == move.PlayerMarker)
             {
                 var emptyCells = MainBoard[move.SubBoardRow, move.SubBoardCol].FindOpenMoves();
+
                 if (emptyCells.Contains(Tuple.Create(move.AtomicCellRow, move.AtomicCellCol)))
                 {
                     AcceptMove(move);

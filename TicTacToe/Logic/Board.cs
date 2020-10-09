@@ -50,23 +50,24 @@ namespace TicTacToe.Logic
             return index % Dimensions;
         }
 
-        public List<Tuple<int, int>> FindOpenMoves()
+        public Queue<Tuple<int, int>> FindOpenMoves()
         {
-            var emptyLocationsOnBoard = new List<Tuple<int, int>>();
+            var emptyLocationsOnBoard = new Queue<Tuple<int, int>>();
             for (int i = 0; i < Dimensions; i++)
             {
                 for (int j = 0; j < Dimensions; j++)
                 {
                     if (GameBoard[i, j].OwningPlayer == null)
                     {
-                        emptyLocationsOnBoard.Add(new Tuple<int, int>(i, j));
+                        emptyLocationsOnBoard.Enqueue(new Tuple<int, int>(i, j));
                     }
                 }
             }
+
             return emptyLocationsOnBoard;
         }
 
-        public PlayerMarker GetOponenentPiece(PlayerMarker playerMarker)
+        public PlayerMarker GetOpponentPiece(PlayerMarker playerMarker)
         {
             return playerMarker == PlayerMarker.X ? PlayerMarker.O : PlayerMarker.X;
         }
@@ -89,12 +90,14 @@ namespace TicTacToe.Logic
                     {
                         count++;
                     }
+
                     if (count == Dimensions && playerMarkerHorizontal != null && playerMarkerHorizontal != PlayerMarker.Tie)
                     {
                         return playerMarkerHorizontal;
                     }
                 }
             }
+
             return null;
         }
 
@@ -104,18 +107,21 @@ namespace TicTacToe.Logic
             {
                 int count = 0;
                 var playerMarkerVertical = GameBoard[j, j].OwningPlayer;
+
                 for (int i = 0; i < Dimensions; i++)
                 {
                     if (GameBoard[i, j].OwningPlayer == playerMarkerVertical)
                     {
                         count++;
                     }
+
                     if (count == Dimensions && playerMarkerVertical != null && playerMarkerVertical != PlayerMarker.Tie)
                     {
                         return playerMarkerVertical;
                     }
                 }
             }
+
             return null;
         }
 
@@ -148,6 +154,7 @@ namespace TicTacToe.Logic
                 {
                     count++;
                 }
+
                 row++;
                 column--;
             }
@@ -156,6 +163,7 @@ namespace TicTacToe.Logic
             {
                 return playerMarkerDiagonalTwo;
             }
+
             return null;
         }
 
@@ -171,6 +179,7 @@ namespace TicTacToe.Logic
                     }
                 }
             }
+
             return PlayerMarker.Tie;
         }
     }

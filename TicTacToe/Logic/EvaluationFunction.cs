@@ -4,14 +4,16 @@
     {
         public int Evaluate(Board<AtomicCell> gameBoard, PlayerMarker playerMarker)
         {
-            if (gameBoard.CheckIfGameOver() == gameBoard.GetOponenentPiece(playerMarker))
+            if (gameBoard.CheckIfGameOver() == playerMarker)
             {
                 return MinMax.maxValue;
             }
-            else if (gameBoard.CheckIfGameOver() == playerMarker)
+
+            else if (gameBoard.CheckIfGameOver() == gameBoard.GetOpponentPiece(playerMarker))
             {
                 return MinMax.minValue;
             }
+
             return 0;
         }
     }

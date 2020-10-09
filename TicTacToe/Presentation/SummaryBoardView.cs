@@ -22,15 +22,18 @@ namespace TicTacToe.Presentation
                 {
                     Console.ForegroundColor = ConsoleColor.Yellow;
                     Console.SetCursorPosition(BoundingBox.TopLeft.X + PrintBoardStartLocation + col * SpaceBetweenPieces, BoundingBox.TopLeft.Y + PrintBoardStartLocation + row * SpaceBetweenPieces);
+
                     if (_mainBoard[row, col].Winner == PlayerMarker.Tie)
                     {
                         Console.Write("-");
                     }
+
                     else
                     {
                         Console.Write(_mainBoard[row, col].Winner);
                     }
                 }
+
                 Console.WriteLine();
             }
         }

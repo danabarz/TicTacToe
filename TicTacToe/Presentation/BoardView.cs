@@ -37,10 +37,12 @@ namespace TicTacToe.Presentation
                 {
                     Console.ForegroundColor = ConsoleColor.Red;
                 }
+
                 else
                 {
                     Console.ForegroundColor = ConsoleColor.DarkRed;
                 }
+
                 Console.SetCursorPosition(i, j);
                 Console.Write("#");
             }
