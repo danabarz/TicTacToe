@@ -15,6 +15,8 @@ namespace TicTacToe.Logic
             int boardColumn = minValue;
             int cellRow = minValue;
             int cellColumn = minValue;
+            int alpha = minValue;
+            int beta = maxValue;
             var open = mainBoard.FindOpenMoves();
 
             while (open.Count > 0)
@@ -22,20 +24,32 @@ namespace TicTacToe.Logic
                 var first = open.Dequeue();
                 var subBoard = mainBoard[first.Item1, first.Item2];
                 var openCell = subBoard.FindOpenMoves();
-                var firstCell = openCell.Dequeue();
 
-                if (subBoard[firstCell.Item1, firstCell.Item2].SetOwningPlayerIfAvailable(playerMarker))
+                while (openCell.Count > 0)
                 {
-                    int moveVal = Minmax(subBoard, 0, false, playerMarker);
+                    var firstCell = openCell.Dequeue();
+
+                    if (subBoard[firstCell.Item1, firstCell.Item2].SetOwningPlayerIfAvailable(playerMarker))
+                    {
+                        int moveVal = Minmax(subBoard, 0, false, playerMarker, alpha, beta);
+
+                        if (moveVal > bestValue)
+                        {
+                            boardRow = subBoard.Row;
+                            boardColumn = subBoard.Column;
+                            cellRow = firstCell.Item1;
+                            cellColumn = firstCell.Item2;
+                            bestValue = moveVal;
+                        }
+
+                        alpha = Math.Max(alpha, bestValue);
+                    }
+
                     subBoard[firstCell.Item1, firstCell.Item2].SetOwningPlayerToNull();
 
-                    if (moveVal > bestValue)
+                    if (beta <= alpha)
                     {
-                        boardRow = subBoard.Row;
-                        boardColumn = subBoard.Column;
-                        cellRow = firstCell.Item1;
-                        cellColumn = firstCell.Item2;
-                        bestValue = moveVal;
+                        break;
                     }
                 }
             }
@@ -43,7 +57,7 @@ namespace TicTacToe.Logic
             return new PlayerMove(boardRow, boardColumn, cellRow, cellColumn, playerMarker);
         }
 
-        private int Minmax(Board<AtomicCell> gameBoard, int depth, bool isMax, PlayerMarker playerMarker)
+        private int Minmax(Board<AtomicCell> gameBoard, int depth, bool isMax, PlayerMarker playerMarker, int alpha, int beta)
         {
             var opponent = gameBoard.GetOpponentPiece(playerMarker);
             int value = evaluateFunction.Evaluate(gameBoard, playerMarker);
@@ -65,29 +79,45 @@ namespace TicTacToe.Logic
 
             if (isMax)
             {
-                return Math.Max(minValue, AddMarkerAndCheckBoardValue(playerMarker) ?? minValue);
+                return AddMarkerAndCheckBoardValue(playerMarker, minValue);
             }
 
-            return Math.Min(maxValue, AddMarkerAndCheckBoardValue(opponent) ?? maxValue);
+            return AddMarkerAndCheckBoardValue(opponent, maxValue);
             
 
-            int? AddMarkerAndCheckBoardValue(PlayerMarker player)
+            int AddMarkerAndCheckBoardValue(PlayerMarker player, int bestVal)
             {
                 var open = gameBoard.FindOpenMoves();
-
+                int best = bestVal;
                 while (open.Count > 0)
                 {
                     var first = open.Dequeue();
 
                     if (gameBoard[first.Item1, first.Item2].SetOwningPlayerIfAvailable(player))
                     {
-                        int moveVal = Minmax(gameBoard, depth + 1, !isMax, playerMarker);
-                        gameBoard[first.Item1, first.Item2].SetOwningPlayerToNull();
-                        return moveVal;
+                        if (player == playerMarker)
+                        {
+                            best = Math.Max(best, Minmax(gameBoard, depth + 1, !isMax, playerMarker, alpha, beta));
+                            alpha = Math.Max(alpha, best);
+                        }
+
+                        else
+                        {
+                            best = Math.Min(best, Minmax(gameBoard, depth + 1, !isMax, playerMarker, alpha, beta));
+                            beta = Math.Min(beta, best);
+
+                        }
+                    }
+
+                    gameBoard[first.Item1, first.Item2].SetOwningPlayerToNull();
+
+                    if (beta <= alpha)
+                    {
+                        break;
                     }
                 }
 
-                return null;
+                return best;
             }
         }
     }
