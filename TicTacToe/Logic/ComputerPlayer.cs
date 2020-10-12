@@ -2,16 +2,16 @@
 {
     public class ComputerPlayer : Player
     {
-        public ComputerPlayer()
+        private readonly MinMax _miniMax;
+
+        public ComputerPlayer() : base("Computer", PlayerMarker.O) 
         {
-            _idPlayer = PlayerMarker.O;
-            _playerName = "Computer";
+            _miniMax = new MinMax(Marker);
         }
 
         public PlayerMove ChooseMove(MainBoard mainBoard)
         {
-            var miniMax = new MinMax();
-            return miniMax.FindBestMove(mainBoard, _idPlayer);
+            return _miniMax.FindBestMove(mainBoard);
         }
     }
 }

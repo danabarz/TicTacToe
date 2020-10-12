@@ -14,7 +14,7 @@ namespace TicTacToe.Presentation
             _topLeft = topLeft;
         }
 
-        public Tuple<int, int> AskForBoardAndCell(int attemps)
+        public PlayerMove AskForBoardAndCell(int attemps, PlayerMarker playerMarker)
         {
             ClearHumanPlayerLines();
             Console.SetCursorPosition(_topLeft.X, _topLeft.Y);
@@ -29,9 +29,10 @@ namespace TicTacToe.Presentation
                 Console.WriteLine("Oops... This cell already taken, Please choose another cell: ");
             }
 
-            var desiredMove = CheckValidFormatAndRange(Console.ReadLine());
-            return (AskForValidalidInput(desiredMove));
+            (int subBoard, int cellBoard) = AskForValidalidInput(CheckValidFormatAndRange(Console.ReadLine()));
+            return new PlayerMove(new BoardCellId(GetRow(subBoard), GetColumn(subBoard)), new BoardCellId(GetRow(cellBoard), GetColumn(cellBoard)), playerMarker);
         }
+
         public void ClearHumanPlayerLines()
         {
             ClearCurrentConsoleLine(_topLeft.X, _topLeft.Y + 1);
@@ -44,7 +45,8 @@ namespace TicTacToe.Presentation
             Console.WriteLine(new String(' ', Console.BufferWidth));
         }
 
-        private Tuple<int, int> AskForValidalidInput(Tuple<int, int>? desiredMove)
+
+        private (int, int) AskForValidalidInput((int, int)? desiredMove)
         {
             while (desiredMove == null)
             {
@@ -54,10 +56,10 @@ namespace TicTacToe.Presentation
                 desiredMove = CheckValidFormatAndRange(Console.ReadLine());
             }
 
-            return desiredMove;
+            return desiredMove.Value;
         }
 
-        private Tuple<int, int>? CheckValidFormatAndRange(string subBoardAndCellIndex)
+        private (int, int)? CheckValidFormatAndRange(string subBoardAndCellIndex)
         {
             string regexPattern = @"\d[,. ]\d";
 
@@ -71,11 +73,15 @@ namespace TicTacToe.Presentation
 
                 if (isSubBoardIndexValid && isCellIndexValid && subBoardIndex <= Game.BoardDimensions * Game.BoardDimensions && cellIndex <= Game.BoardDimensions * Game.BoardDimensions)
                 {
-                    return Tuple.Create(--subBoardIndex, --cellIndex);
+                    return (--subBoardIndex, --cellIndex);
                 }
             }
 
             return null;
         }
+
+        private int GetRow(int index) => index / Game.BoardDimensions;
+
+        private int GetColumn(int index) => index % Game.BoardDimensions;
     }
 }

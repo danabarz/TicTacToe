@@ -2,14 +2,14 @@
 
 namespace TicTacToe.Logic
 {
-    public class PlayerEventArgs : EventArgs
+    public class HumanPlayerMoveEventArgs : EventArgs
     {
-        public PlayerEventArgs(Player player, int attemptsCount)
+        public HumanPlayerMoveEventArgs(Player player, int attemptsCount)
         {
             Player = player;
             AttemptsCount = attemptsCount;
         }
-        public PlayerEventArgs(Player player)
+        public HumanPlayerMoveEventArgs(Player player)
         {
             Player = player;
         }

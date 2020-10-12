@@ -25,7 +25,7 @@
             return wasAvailable;
         }
 
-        public void SetOwningPlayerToNull()
+        public void SetNoOwningPlayer()
         {
             OwningPlayer = null;
         }

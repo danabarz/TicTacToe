@@ -2,19 +2,15 @@
 {
     public class PlayerMove
     {
-        public PlayerMove(int subBoardRow, int subBoardCol, int atomicCellRow, int atomicCellCol, PlayerMarker playerMarker)
+        public PlayerMove(BoardCellId subBoardCellId, BoardCellId atomicCellId, PlayerMarker playerMarker)
         {
-            SubBoardRow = subBoardRow;
-            SubBoardCol = subBoardCol;
-            AtomicCellRow = atomicCellRow;
-            AtomicCellCol = atomicCellCol;
+            SubBoardCellId = subBoardCellId;
+            AtomicCellId = atomicCellId;
             PlayerMarker = playerMarker;
         }
 
-        public int SubBoardRow { get; }
-        public int SubBoardCol { get; }
-        public int AtomicCellRow { get; }
-        public int AtomicCellCol { get; }
+        public BoardCellId SubBoardCellId { get; }
+        public BoardCellId AtomicCellId { get; }
         public PlayerMarker PlayerMarker { get; }
     }
 }

@@ -2,6 +2,6 @@
 {
     public class MainBoard : Board<SubBoard>
     {
-        public MainBoard() : base((cellRow, cellCol) => new SubBoard(cellRow, cellCol)) { }
+        public MainBoard() : base((boardCell) => new SubBoard(boardCell.Row, boardCell.Column)) { }
     }
 }

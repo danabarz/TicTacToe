@@ -18,6 +18,7 @@ namespace TicTacToe.Presentation
         private SummaryBoardView? _summaryBoardView;
         private HumanPlayerView? _humanPlayerView;
         private PlayerMove? _humanPlayerMove;
+        private bool _isMainBoardHaveWinner = false;
 
         public void RunGame()
         {
@@ -31,14 +32,13 @@ namespace TicTacToe.Presentation
             _humanPlayerView = new HumanPlayerView(_mainBoardView.BoundingBox.BottomLeft + new Size(0, Game.BoardDimensions));
             _mainBoardView.PrintBoard();
             _summaryBoardView.PrintBoard();
-
             _game.HumanPlayerMoveRequested += OnHumanPlayerMoveRequested;
             _game.CurrentPlayerChanged += OnCurrentPlayerChanged;
             _game.Start();
 
-            while (_game.Winner == null)
+            while (!_isMainBoardHaveWinner)
             {
-                _game.AcceptHumanPlayerMoveAndProceed(_humanPlayerMove);
+                _isMainBoardHaveWinner = _game.AcceptHumanPlayerMoveAndProceed(_humanPlayerMove);
             }
 
             PrintResult(_game.Winner);
@@ -76,14 +76,13 @@ namespace TicTacToe.Presentation
                 => Enum.GetValues(typeof(TEnum)).Cast<int>().ToArray();
         }
 
-        private void OnHumanPlayerMoveRequested(object? source, PlayerEventArgs args)
+        private void OnHumanPlayerMoveRequested(object? source, HumanPlayerMoveEventArgs args)
         {
             SetBaseColor();
-            var (boardNumber, cellNuber) = _humanPlayerView.AskForBoardAndCell(args.AttemptsCount);
-            _humanPlayerMove = new PlayerMove(_game.MainBoard.GetRow(boardNumber), _game.MainBoard.GetColumn(boardNumber), _game.MainBoard.GetRow(cellNuber), _game.MainBoard.GetColumn(cellNuber), args.Player.IdPlayer);
+            _humanPlayerMove = _humanPlayerView.AskForBoardAndCell(args.AttemptsCount, args.Player.Marker);
         }
 
-        private void OnCurrentPlayerChanged(object? source, PlayerEventArgs args)
+        private void OnCurrentPlayerChanged(object? source, HumanPlayerMoveEventArgs args)
         {
             _humanPlayerView.ClearHumanPlayerLines();
             _humanPlayerView.ClearCurrentConsoleLine(0, _mainBoardView.BoundingBox.BottomLeft.Y + Game.BoardDimensions - 1);

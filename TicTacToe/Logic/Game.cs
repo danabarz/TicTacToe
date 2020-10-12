@@ -5,13 +5,13 @@ namespace TicTacToe.Logic
     public sealed class Game // Sealed because we want to keep a private constructor
     {
         public const int BoardDimensions = 3;
-        private int attemptsCount = 0;
+        private int _attemptsCount = 0;
 
         private readonly Player[] _players;
         private int _currentPlayerIndex;
 
         public static Game CreateHumanVsHuman(string player1Name, string player2Name)
-            => new Game(new HumanPlayer(PlayerMarker.X, player1Name), new HumanPlayer(PlayerMarker.O, player2Name));
+            => new Game(new HumanPlayer(player1Name, PlayerMarker.X), new HumanPlayer(player2Name, PlayerMarker.O));
 
         public static Game CreateHumanVsComputer()
             => new Game(new HumanPlayer(), new ComputerPlayer());
@@ -26,51 +26,67 @@ namespace TicTacToe.Logic
         public MainBoard MainBoard { get; }
         public PlayerMarker? Winner => MainBoard.Winner;
 
-        public event EventHandler<PlayerEventArgs>? HumanPlayerMoveRequested;
-        public event EventHandler<PlayerEventArgs>? CurrentPlayerChanged;
+        public event EventHandler<HumanPlayerMoveEventArgs>? HumanPlayerMoveRequested;
+        public event EventHandler<HumanPlayerMoveEventArgs>? CurrentPlayerChanged;
 
-        public void Start()
+        public static PlayerMarker GetOpponentMarker(PlayerMarker playerMarker)
         {
-            CurrentPlayerChanged?.Invoke(this, new PlayerEventArgs(CurrentPlayer));
-            RunUntilHumanPlayerMoveRequested();
+            return playerMarker == PlayerMarker.X ? PlayerMarker.O : PlayerMarker.X;
         }
 
-        public void AcceptHumanPlayerMoveAndProceed(PlayerMove move)
+        public bool Start()
         {
-            if (CurrentPlayer.IdPlayer == move.PlayerMarker)
-            {
-                var emptyCells = MainBoard[move.SubBoardRow, move.SubBoardCol].FindOpenMoves();
+            CurrentPlayerChanged?.Invoke(this, new HumanPlayerMoveEventArgs(CurrentPlayer));
+            return RunUntilHumanPlayerMoveRequested();
+        }
 
-                if (emptyCells.Contains(Tuple.Create(move.AtomicCellRow, move.AtomicCellCol)))
+        public bool AcceptHumanPlayerMoveAndProceed(PlayerMove move)
+        {
+            if (CurrentPlayer.Marker == move.PlayerMarker)
+            {
+                var emptyCells = MainBoard[move.SubBoardCellId.Row, move.SubBoardCellId.Column].FindOpenMoves();
+
+                if (emptyCells.Contains((move.AtomicCellId)))
                 {
-                    AcceptMove(move);
+                    if (AcceptMove(move))
+                    {
+                        return true;
+                    }
                 }
             }
 
-            RunUntilHumanPlayerMoveRequested();
+            return RunUntilHumanPlayerMoveRequested();
         }
 
-        private void RunUntilHumanPlayerMoveRequested()
+        private bool RunUntilHumanPlayerMoveRequested()
         {
             while (CurrentPlayer is ComputerPlayer computerPlayer)
             {
                 var move = computerPlayer.ChooseMove(MainBoard);
-                AcceptMove(move);
+                if (AcceptMove(move))
+                {
+                    return true;
+                }
             }
 
-            HumanPlayerMoveRequested?.Invoke(this, new PlayerEventArgs(CurrentPlayer, attemptsCount++));
+            HumanPlayerMoveRequested?.Invoke(this, new HumanPlayerMoveEventArgs(CurrentPlayer, _attemptsCount++));
+            return false;
         }
 
-        private void AcceptMove(PlayerMove move)
+        private bool AcceptMove(PlayerMove move)
         {
-            if (MainBoard[move.SubBoardRow, move.SubBoardCol][move.AtomicCellRow, move.AtomicCellCol].SetOwningPlayerIfAvailable(move.PlayerMarker))
+            if (MainBoard[move.SubBoardCellId.Row, move.SubBoardCellId.Column][move.AtomicCellId.Row, move.AtomicCellId.Column].SetOwningPlayerIfAvailable(move.PlayerMarker))
             {
-                MainBoard[move.SubBoardRow, move.SubBoardCol].SetWinner();
-                MainBoard.SetWinner();
-                _currentPlayerIndex = (_currentPlayerIndex + 1) % _players.Length;
-                attemptsCount = 0;
-                CurrentPlayerChanged?.Invoke(this, new PlayerEventArgs(CurrentPlayer));
+                if (MainBoard[move.SubBoardCellId.Row, move.SubBoardCellId.Column].UpdateBoard());
+                {
+                    _currentPlayerIndex = (_currentPlayerIndex + 1) % _players.Length;
+                    _attemptsCount = 0;
+                    CurrentPlayerChanged?.Invoke(this, new HumanPlayerMoveEventArgs(CurrentPlayer));
+                    return MainBoard.UpdateBoard();
+                }
             }
+
+            return false;
         }
 
         private Player CurrentPlayer => _players[_currentPlayerIndex];

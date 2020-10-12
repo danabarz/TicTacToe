@@ -2,10 +2,13 @@
 {
     public abstract class Player
     {
-        protected string? _playerName;
-        protected PlayerMarker _idPlayer;
+        protected Player(string playerName, PlayerMarker marker)
+        {
+            PlayerName = playerName;
+            Marker = marker;
+        }
 
-        public string? PlayerName => _playerName;
-        public PlayerMarker IdPlayer => _idPlayer;
+        public string? PlayerName { get; }
+        public PlayerMarker Marker { get; }
     }
 }

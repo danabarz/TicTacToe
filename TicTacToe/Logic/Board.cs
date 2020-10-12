@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace TicTacToe.Logic
 {
@@ -7,8 +8,10 @@ namespace TicTacToe.Logic
         where TCell : class, IBoardCell
     {
         protected const int Dimensions = Game.BoardDimensions;
+        private readonly IEnumerable<int> _rows = Enumerable.Range(0, Dimensions);
+        private readonly IEnumerable<int> _columns = Enumerable.Range(0, Dimensions);
 
-        protected Board(Func<int, int, TCell> cellFactory)
+        protected Board(Func<BoardCellId ,TCell> cellFactory)
         {
             GameBoard = new TCell[Dimensions, Dimensions];
             Winner = null;
@@ -16,8 +19,8 @@ namespace TicTacToe.Logic
             for (int i = 0; i < Dimensions; i++)
             {
                 for (int j = 0; j < Dimensions; j++)
-                {
-                    GameBoard[i, j] = cellFactory(i, j);
+                {     
+                    GameBoard[i, j] = cellFactory(new BoardCellId(i, j));
                 }
             }
         }
@@ -29,37 +32,34 @@ namespace TicTacToe.Logic
 
         public TCell this[int row, int col] => GameBoard[row, col];
 
-        public void SetWinner()
+        private bool SetWinnerIfGameOver()
         {
             var winnerMarker = CheckIfGameOver();
             if (winnerMarker != null)
             {
                 Winner = winnerMarker;
+                return true;
             }
 
+            return false;
+        }
+
+        public bool UpdateBoard()
+        {
             UpdatedBoardPieces?.Invoke(this, EventArgs.Empty);
+            return SetWinnerIfGameOver();
         }
 
-        public int GetRow(int index)
+        public Queue<BoardCellId> FindOpenMoves()
         {
-            return index / Dimensions;
-        }
-
-        public int GetColumn(int index)
-        {
-            return index % Dimensions;
-        }
-
-        public Queue<Tuple<int, int>> FindOpenMoves()
-        {
-            var emptyLocationsOnBoard = new Queue<Tuple<int, int>>();
+            var emptyLocationsOnBoard = new Queue<BoardCellId>();
             for (int i = 0; i < Dimensions; i++)
             {
                 for (int j = 0; j < Dimensions; j++)
                 {
                     if (GameBoard[i, j].OwningPlayer == null)
                     {
-                        emptyLocationsOnBoard.Enqueue(new Tuple<int, int>(i, j));
+                        emptyLocationsOnBoard.Enqueue(new BoardCellId(i, j));
                     }
                 }
             }
@@ -67,34 +67,27 @@ namespace TicTacToe.Logic
             return emptyLocationsOnBoard;
         }
 
-        public PlayerMarker GetOpponentPiece(PlayerMarker playerMarker)
-        {
-            return playerMarker == PlayerMarker.X ? PlayerMarker.O : PlayerMarker.X;
-        }
-
         public PlayerMarker? CheckIfGameOver()
         {
-            var winnerForBoard = (HorizontalWinForGame() ?? VerticalWinForGame()) ?? DiagonalWinForGame() ?? TieWinForGame();
-            return winnerForBoard;
+            if (Winner == null)
+            {
+                var winnerForBoard = (HorizontalWinForGame(GameBoard) ?? VerticalWinForGame()) ?? DiagonalWinForGame();
+                return (winnerForBoard == null && TieForGame()) ?  PlayerMarker.Tie : winnerForBoard;
+            }
+
+            return Winner;
         }
 
-        private PlayerMarker? HorizontalWinForGame()
+        private PlayerMarker? HorizontalWinForGame(TCell[,] gameBoard)
         {
-            for (int i = 0; i < Dimensions; i++)
+            foreach (var row in _rows)
             {
-                int count = 0;
-                var playerMarkerHorizontal = GameBoard[i, i].OwningPlayer;
-                for (int j = 0; j < Dimensions; j++)
-                {
-                    if (GameBoard[i, j].OwningPlayer == playerMarkerHorizontal)
-                    {
-                        count++;
-                    }
+                var playerMarkerMainDiagonal = gameBoard[row, row].OwningPlayer;
+                var horizontalWinResult = _columns.Where(col => gameBoard[row, col].OwningPlayer == playerMarkerMainDiagonal).ToList();
 
-                    if (count == Dimensions && playerMarkerHorizontal != null && playerMarkerHorizontal != PlayerMarker.Tie)
-                    {
-                        return playerMarkerHorizontal;
-                    }
+                if (horizontalWinResult.Count() == Dimensions && playerMarkerMainDiagonal != null && playerMarkerMainDiagonal != PlayerMarker.Tie)
+                {
+                    return playerMarkerMainDiagonal;
                 }
             }
 
@@ -103,84 +96,44 @@ namespace TicTacToe.Logic
 
         private PlayerMarker? VerticalWinForGame()
         {
-            for (int j = 0; j < Dimensions; j++)
-            {
-                int count = 0;
-                var playerMarkerVertical = GameBoard[j, j].OwningPlayer;
-
-                for (int i = 0; i < Dimensions; i++)
-                {
-                    if (GameBoard[i, j].OwningPlayer == playerMarkerVertical)
-                    {
-                        count++;
-                    }
-
-                    if (count == Dimensions && playerMarkerVertical != null && playerMarkerVertical != PlayerMarker.Tie)
-                    {
-                        return playerMarkerVertical;
-                    }
-                }
-            }
-
-            return null;
+            return HorizontalWinForGame(TransposeGameBoard(GameBoard));
         }
 
         private PlayerMarker? DiagonalWinForGame()
         {
-            int count = 0;
-            int row = 0;
-            int column = 2;
-            var playerMarkerDiagonalOne = GameBoard[row, row].OwningPlayer;
+            return (CheckDiagonalWin(_columns) ?? CheckDiagonalWin(_columns.Reverse()));
 
-            for (int j = 0; j < Dimensions; j++)
+            PlayerMarker? CheckDiagonalWin(IEnumerable<int> columns)
             {
-                if (GameBoard[j, j].OwningPlayer == playerMarkerDiagonalOne)
-                {
-                    count++;
-                }
+                var playerMarkerDiagonal = GameBoard[_rows.First(), columns.First()].OwningPlayer;
+                var diagonalResult = _rows.Where(row => GameBoard[row, columns.ElementAt(row)].OwningPlayer == playerMarkerDiagonal).ToList();
+                return (diagonalResult.Count() == Dimensions && playerMarkerDiagonal != null && playerMarkerDiagonal != PlayerMarker.Tie) ? playerMarkerDiagonal : null;
             }
-
-            if (count == Dimensions && playerMarkerDiagonalOne != null && playerMarkerDiagonalOne != PlayerMarker.Tie)
-            {
-                return playerMarkerDiagonalOne;
-            }
-
-            count = 0;
-            var playerMarkerDiagonalTwo = GameBoard[row, column].OwningPlayer;
-
-            while (row < Dimensions && column >= 0)
-            {
-                if (GameBoard[row, column].OwningPlayer == playerMarkerDiagonalTwo)
-                {
-                    count++;
-                }
-
-                row++;
-                column--;
-            }
-
-            if (count == Dimensions && playerMarkerDiagonalTwo != null && playerMarkerDiagonalTwo != PlayerMarker.Tie)
-            {
-                return playerMarkerDiagonalTwo;
-            }
-
-            return null;
         }
 
-        private PlayerMarker? TieWinForGame()
+        private bool TieForGame()
         {
+            var tieResult = from row in _rows
+                            from col in _columns
+                            where GameBoard[row, col].OwningPlayer != null
+                            select row;
+
+            return (tieResult.Count() == Dimensions * Dimensions);
+        }
+
+        private TCell[,] TransposeGameBoard(TCell[,] gameBoard)
+        {
+            TCell[,] transposeGameBoard = new TCell[Dimensions, Dimensions];
+
             for (int i = 0; i < Dimensions; i++)
             {
                 for (int j = 0; j < Dimensions; j++)
                 {
-                    if (GameBoard[i, j].OwningPlayer == null)
-                    {
-                        return null;
-                    }
+                    transposeGameBoard[j, i] = gameBoard[i, j];
                 }
             }
 
-            return PlayerMarker.Tie;
+            return transposeGameBoard;
         }
     }
 }

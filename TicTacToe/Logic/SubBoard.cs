@@ -2,7 +2,7 @@
 {
     public class SubBoard : Board<AtomicCell>, IBoardCell
     {
-        public SubBoard(int row, int col) : base((cellRow, cellCol) => new AtomicCell(cellRow, cellCol))
+        public SubBoard(int row, int col) : base((boardCell) => new AtomicCell(boardCell.Row, boardCell.Column))
         {
             Row = row;
             Column = col;
