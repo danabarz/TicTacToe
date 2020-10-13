@@ -16,21 +16,31 @@ namespace TicTacToe.Presentation
 
         public PlayerMove AskForBoardAndCell(int attemps, PlayerMarker playerMarker)
         {
+            PlayerMove? move = null;
             ClearHumanPlayerLines();
             Console.SetCursorPosition(_topLeft.X, _topLeft.Y);
+            Console.WriteLine("Please enter sub board and cell: ");
 
-            if (attemps == 0)
+            while (move == null)
             {
-                Console.WriteLine("Please enter sub board and cell, for example- \"1 1\": ");
+                try
+                {
+                    (int, int)? desireLocation = CheckValidFormat(Console.ReadLine());
+                    if (desireLocation != null)
+                    {
+                        move = CheckValidNumbers(desireLocation.Value.Item1, desireLocation.Value.Item2, playerMarker);
+                    }
+                }
+
+                catch (Exception e)
+                {
+                    ClearHumanPlayerLines();
+                    Console.SetCursorPosition(_topLeft.X, _topLeft.Y);
+                    Console.WriteLine(e.Message);
+                }
             }
 
-            else
-            {
-                Console.WriteLine("Oops... This cell already taken, Please choose another cell: ");
-            }
-
-            (int subBoard, int cellBoard) = AskForValidalidInput(CheckValidFormatAndRange(Console.ReadLine()));
-            return new PlayerMove(new BoardCellId(GetRow(subBoard), GetColumn(subBoard)), new BoardCellId(GetRow(cellBoard), GetColumn(cellBoard)), playerMarker);
+            return move;
         }
 
         public void ClearHumanPlayerLines()
@@ -46,38 +56,30 @@ namespace TicTacToe.Presentation
         }
 
 
-        private (int, int) AskForValidalidInput((int, int)? desiredMove)
+        private PlayerMove? CheckValidNumbers(int boardIndex, int cellINdex, PlayerMarker playerMarker)
         {
-            while (desiredMove == null)
+            if (boardIndex < Game.BoardDimensions * Game.BoardDimensions && cellINdex < Game.BoardDimensions * Game.BoardDimensions && boardIndex >= 0 && cellINdex >= 0)
             {
-                ClearHumanPlayerLines();
-                Console.SetCursorPosition(_topLeft.X, _topLeft.Y);
-                Console.WriteLine("Oops... Please select numbers between 1-9 and write in a proper format");
-                desiredMove = CheckValidFormatAndRange(Console.ReadLine());
+                return new PlayerMove(new BoardCellId(GetRow(boardIndex), GetColumn(boardIndex)), new BoardCellId(GetRow(cellINdex), GetColumn(cellINdex)), playerMarker);
             }
 
-            return desiredMove.Value;
+            throw new InvalidOperationException("Oops...Not a valid numbers. Please select numbers between 1 - 9");  
         }
 
-        private (int, int)? CheckValidFormatAndRange(string subBoardAndCellIndex)
+        private (int, int)? CheckValidFormat(string subBoardAndCellIndex)
         {
             string regexPattern = @"\d[,. ]\d";
-
             if (Regex.Match(subBoardAndCellIndex, regexPattern).Success)
             {
                 string[] userInput = Regex.Split(subBoardAndCellIndex, @"[,. ]");
                 string strSubBoardIndex = userInput[0];
                 string strCellIndex = userInput[1];
-                bool isSubBoardIndexValid = int.TryParse(strSubBoardIndex, out int subBoardIndex);
-                bool isCellIndexValid = int.TryParse(strCellIndex, out int cellIndex);
-
-                if (isSubBoardIndexValid && isCellIndexValid && subBoardIndex <= Game.BoardDimensions * Game.BoardDimensions && cellIndex <= Game.BoardDimensions * Game.BoardDimensions)
-                {
-                    return (--subBoardIndex, --cellIndex);
-                }
+                int subBoardIndex = int.Parse(strSubBoardIndex);
+                int cellIndex = int.Parse(strCellIndex);
+                return (--subBoardIndex, --cellIndex);
             }
 
-            return null;
+            throw new FormatException("Oops... Input was not in a correct format- 1,1");
         }
 
         private int GetRow(int index) => index / Game.BoardDimensions;

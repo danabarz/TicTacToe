@@ -45,13 +45,19 @@ namespace TicTacToe.Logic
             if (CurrentPlayer.Marker == move.PlayerMarker)
             {
                 var emptyCells = MainBoard[move.SubBoardCellId.Row, move.SubBoardCellId.Column].FindOpenMoves();
-
-                if (emptyCells.Contains((move.AtomicCellId)))
+                try
                 {
-                    if (AcceptMove(move))
+                    if (emptyCells.Contains((move.AtomicCellId)))
                     {
-                        return true;
+                        if (AcceptMove(move))
+                        {
+                            return true;
+                        }
                     }
+                }
+                catch(Exception e)
+                {
+                    throw;
                 }
             }
 
