@@ -32,18 +32,6 @@ namespace TicTacToe.Logic
 
         public TCell this[int row, int col] => GameBoard[row, col];
 
-        private bool SetWinnerIfGameOver()
-        {
-            var winnerMarker = CheckIfGameOver();
-            if (winnerMarker != null)
-            {
-                Winner = winnerMarker;
-                return true;
-            }
-
-            return false;
-        }
-
         public bool UpdateBoard()
         {
             UpdatedBoardPieces?.Invoke(this, EventArgs.Empty);
@@ -78,6 +66,18 @@ namespace TicTacToe.Logic
             return Winner;
         }
 
+        private bool SetWinnerIfGameOver()
+        {
+            var winnerMarker = CheckIfGameOver();
+            if (winnerMarker != null)
+            {
+                Winner = winnerMarker;
+                return true;
+            }
+
+            return false;
+        }
+
         private PlayerMarker? HorizontalWinForGame(TCell[,] gameBoard)
         {
             foreach (var row in _rows)
@@ -101,7 +101,7 @@ namespace TicTacToe.Logic
 
         private PlayerMarker? DiagonalWinForGame()
         {
-            return (CheckDiagonalWin(_columns) ?? CheckDiagonalWin(_columns.Reverse()));
+            return CheckDiagonalWin(_columns) ?? CheckDiagonalWin(_columns.Reverse());
 
             PlayerMarker? CheckDiagonalWin(IEnumerable<int> columns)
             {
@@ -113,12 +113,8 @@ namespace TicTacToe.Logic
 
         private bool TieForGame()
         {
-            var tieResult = from row in _rows
-                            from col in _columns
-                            where GameBoard[row, col].OwningPlayer != null
-                            select row;
-
-            return (tieResult.Count() == Dimensions * Dimensions);
+            var tieResult = from row in _rows from col in _columns where GameBoard[row, col].OwningPlayer != null select row;         
+            return tieResult.Count() == Dimensions * Dimensions;
         }
 
         private TCell[,] TransposeGameBoard(TCell[,] gameBoard)
