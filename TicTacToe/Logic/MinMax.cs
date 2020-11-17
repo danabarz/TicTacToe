@@ -4,8 +4,8 @@ namespace TicTacToe.Logic
 {
     public class MinMax
     {
-        public const int minValue = -100;
-        public const int maxValue = 100;
+        public const int MinValue = -100;
+        public const int MaxValue = 100;
         public MinMax(PlayerMarker playerMarker)
         {
             PlayerMarker = playerMarker;
@@ -17,11 +17,11 @@ namespace TicTacToe.Logic
 
         public PlayerMove FindBestMove(MainBoard mainBoard)
         {
-            int bestValue = minValue;
-            int alpha = minValue;
-            int beta = maxValue;
-            var subBoardId = new BoardCellId(minValue, minValue);
-            var cellId = new BoardCellId(minValue, minValue);
+            int bestValue = MinValue;
+            int alpha = MinValue;
+            int beta = MaxValue;
+            var subBoardId = new BoardCellId(MinValue, MinValue);
+            var cellId = new BoardCellId(MinValue, MinValue);
             var openSubBoards = mainBoard.FindOpenMoves();
 
             while (openSubBoards.Count > 0)
@@ -64,12 +64,12 @@ namespace TicTacToe.Logic
         {
             int result = MinMaxEvaluationFunction.Evaluate(gameBoard, PlayerMarker, OpponentPlayerMarker);
 
-            if (result == maxValue)
+            if (result == MaxValue)
             {
                 return result - depth;
             }
 
-            else if (result == minValue)
+            else if (result == MinValue)
             {
                 return result + depth;
             }
@@ -79,7 +79,7 @@ namespace TicTacToe.Logic
                 return 0;
             }
 
-            return (isMax) ? AddMarkerAndCheckBoardValue(PlayerMarker, minValue) : AddMarkerAndCheckBoardValue(OpponentPlayerMarker, maxValue);          
+            return (isMax) ? AddMarkerAndCheckBoardValue(PlayerMarker, MinValue) : AddMarkerAndCheckBoardValue(OpponentPlayerMarker, MaxValue);          
 
             int AddMarkerAndCheckBoardValue(PlayerMarker marker, int bestVal)
             {

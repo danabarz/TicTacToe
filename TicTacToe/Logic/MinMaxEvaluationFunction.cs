@@ -6,10 +6,10 @@
         {
             if (gameBoard.CheckIfGameOver() == playerMarker)
             {
-                return MinMax.maxValue;
+                return MinMax.MaxValue;
             }
 
-            return (gameBoard.CheckIfGameOver() == opponentMarker) ? MinMax.minValue : 0;
+            return (gameBoard.CheckIfGameOver() == opponentMarker) ? MinMax.MinValue : 0;
         }
     }
 }
